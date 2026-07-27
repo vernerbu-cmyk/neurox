@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Столбики</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial, sans-serif;
+  background:#fff;
+}
+
+/* TOP */
+.top{
+  background:#1E3F8A;
+  color:#fff;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  position:sticky;
+  top:0;
+}
+
+.top-title{
+  width:100%;
+  text-align:center;
+  font-style:italic;
+  font-size:22px;
+  font-weight:600;
+}
+
+label{font-size:14px;color:#fff;}
+
+input[type="range"]{accent-color:#FF6A00;}
+
+input[type="number"], select{
+  border-radius:6px;
+  border:none;
+  padding:4px;
+}
+
+button{
+  background:#FF6A00;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:8px;
+  box-shadow:0 4px 0 #c84f00;
+  cursor:pointer;
+}
+
+button:active{
+  transform:translateY(2px);
+  box-shadow:0 2px 0 #c84f00;
+}
+
+.word{
+  margin-top:70px;
+  text-align:center;
+  font-size:28px;
+  font-weight:bold;
+  user-select:none;
+  padding:10px;
+}
+
+.panel{
+  position:fixed;
+  top:70px;
+  left:5%;
+  width:90%;
+  max-width:600px;
+  background:#fff;
+  border:1px solid #ddd;
+  padding:10px;
+  display:none;
+  z-index:1000;
+  overflow:auto;
+  max-height:80vh;
+  border-radius:10px;
+}
+
+.wordItem{
+  display:flex;
+  justify-content:space-between;
+  padding:5px;
+  border-bottom:1px solid #eee;
+}
+
+.wordText{flex:1;cursor:pointer;}
+
+.deleteBtn{
+  color:#FF6A00;
+  cursor:pointer;
+  font-weight:bold;
+}
+
+.levelTitle{
+  margin-top:10px;
+  font-weight:bold;
+  color:#1E3F8A;
+}
+
+.highlight{
+  color:#FF6A00;
+  font-weight:bold;
+}
+
+.author{
+  position:fixed;
+  right:8px;
+  bottom:6px;
+  font-size:11px;
+  color:#aaa;
+}
+</style>
+</head>
+
+<body>
+
+<div class="top">
+
+  <div class="top-title">Столбики</div>
+
+  <label>Скорость
+    <input type="range" id="speed" min="0" max="12" value="0">
+  </label>
+
+  <label>Уровень
+    <select id="level">
+      <option value="random">Случайно</option>
+      <option value="1">1</option><option value="2">2</option>
+      <option value="3">3</option><option value="4">4</option>
+      <option value="5">5</option><option value="6">6</option>
+      <option value="7">7</option><option value="8">8</option>
+    </select>
+  </label>
+
+  <label><input type="checkbox" id="syllables"> слоги</label>
+  <label><input type="checkbox" id="highlight"> подсветка</label>
+  <label><input type="checkbox" id="auto" checked> авто</label>
+
+  <label>Размер
+    <input type="number" id="fontSize" value="28">
+  </label>
+
+  <label>Шрифт
+    <select id="fontFamily">
+      <option>Arial</option>
+      <option>Georgia</option>
+      <option>Verdana</option>
+      <option>Tahoma</option>
+      <option>Courier New</option>
+    </select>
+  </label>
+
+</div>
+
+<div class="panel" id="basePanel">
+<textarea id="newWords"></textarea>
+<button id="addBtn">Добавить</button>
+<button id="dedupBtn">Дубликаты</button>
+<button id="clearBtn">Очистить</button>
+<div id="baseList"></div>
+</div>
+
+<div class="word" id="wordDisplay">Загрузка...</div>
+<div class="author">© verner</div>
+
+<script>
+
+/* =========================
+   STATE
+========================= */
+
+let wordBase = {1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]};
+let appReady = false;
+
+const vowels = "аоуыэиеёюя";
+
+const speedTable = [
+4000,3500,3000,2500,2000,1750,1500,1250,1000,750,500,250,100
+];
+
+let timer;
+
+/* =========================
+   LOAD BASE
+========================= */
+
+document.addEventListener("DOMContentLoaded",()=>{
+  loadBase();
+});
+
+async function loadBase(){
+  try{
+    const res = await fetch("./base.json",{cache:"no-cache"});
+    if(!res.ok) throw new Error();
+
+    let data = await res.json();
+
+    if(Array.isArray(data)){
+      const base = {1:[],2:[],3:[],4:[],5:[],6:[],7:[],8:[]};
+      data.forEach(w=>{
+        base[detectLevel(w)].push(w);
+      });
+      wordBase = base;
+    } else {
+      wordBase = data;
+    }
+
+  } catch(e){
+    wordBase = {
+      1:["дом","кот"],
+      2:["мама","рама"],
+      3:["пальма","морковь"],
+      4:["собака"],
+      5:["телефон"],
+      6:["облако"],
+      7:["самолёт"],
+      8:["математика"]
+    };
+  }
+
+  appReady = true;
+  show();
+  restart();
+}
+
+/* =========================
+   LEVELS
+========================= */
+
+function detectLevel(w){
+  let word = w.trim().toLowerCase();
+  let v = [...word].filter(c=>vowels.includes(c)).length;
+  let len = word.length;
+
+  if(v===1) return 1;
+  if(v===2 && len<=5) return 2;
+  if(v===2 && len>=6) return 3;
+  if(v===3 && len<=7) return 4;
+  if(v===3) return 5;
+  if(v===4 && len<=9) return 6;
+  if(v===4) return 7;
+  if(v>=5) return 8;
+
+  return 7;
+}
+
+/* =========================
+   CORE SYLLABLE ENGINE (FIXED)
+========================= */
+
+function isVowel(ch){
+  return vowels.includes(ch);
+}
+
+/* ✔ теперь реально используется */
+function preprocess(word){
+
+  word = word.toLowerCase().replace(/[^а-яё]/g,"");
+
+  const res = [];
+
+  for(let i=0;i<word.length;i++){
+
+    const ch = word[i];
+
+    // мягкий/твёрдый знак
+    if(ch==="ь"||ch==="ъ"){
+      if(res.length) res[res.length-1]+=ch;
+      continue;
+    }
+
+    // й
+    if(ch==="й"){
+      if(res.length) res[res.length-1]+=ch;
+      else res.push(ch);
+      continue;
+    }
+
+    res.push(ch);
+  }
+
+  return res;
+}
+
+/* =========================
+   SPLIT (FIXED STABLE VERSION)
+========================= */
+
+function split(word){
+
+  word = word.toLowerCase().replace(/[^а-яё\s]/g,"");
+
+  const res = [];
+  let cur = "";
+
+  const isVowel = ch => vowels.includes(ch);
+
+  for(let i=0;i<word.length;i++){
+
+    const ch = word[i];
+    cur += ch;
+
+    // нашли гласную
+    if(isVowel(ch)){
+
+      let j = i + 1;
+      let cons = "";
+
+      // собираем согласные до следующей гласной
+      while(j < word.length && !isVowel(word[j])){
+        cons += word[j];
+        j++;
+      }
+
+      // конец слова → всё остаётся в одном слоге
+      if(j >= word.length){
+        cur += cons;
+        res.push(cur);
+        return res;
+      }
+
+      // 0 согласных
+      if(cons.length === 0){
+        res.push(cur);
+        cur = "";
+        continue;
+      }
+
+      // 1 согласная → вправо
+     if(cons.length === 1){
+
+    res.push(cur);
+
+    cur = cons;
+
+    i = j - 1;
+    continue;
+}
+
+      // 2+ согласных → ВСЁ кроме последней влево
+      cur += cons.slice(0, -1);
+      res.push(cur);
+      cur = cons.slice(-1);
+
+      i = j - 1;
+    }
+  }
+
+  if(cur) res.push(cur);
+
+  return res;
+}
+
+/* =========================
+   UI
+========================= */
+
+function decorate(w){
+
+  let parts = split(w);
+
+  if(highlight.checked){
+    parts = parts.map(p=>
+      "<span class='highlight'>"+p[0]+"</span>"+p.slice(1)
+    );
+  }
+
+  return syllables.checked ? parts.join("-") : parts.join("");
+}
+
+function show(){
+
+  if(!appReady) return;
+
+  let pool=[];
+
+  if(level.value==="random"){
+    for(let i=1;i<=8;i++) pool.push(...wordBase[i]);
+  } else pool = wordBase[level.value]||[];
+
+  if(!pool.length){
+    wordDisplay.textContent="—";
+    return;
+  }
+
+  let w = pool[Math.floor(Math.random()*pool.length)];
+
+  wordDisplay.innerHTML = decorate(w);
+  wordDisplay.style.fontSize = fontSize.value+"px";
+  wordDisplay.style.fontFamily = fontFamily.value;
+}
+
+function restart(){
+  clearInterval(timer);
+  if(auto.checked){
+    timer=setInterval(show,speedTable[speed.value]);
+  }
+}
+
+/* ========================= */
+
+speed.oninput=restart;
+level.onchange=show;
+syllables.onchange=show;
+highlight.onchange=show;
+auto.onchange=restart;
+fontSize.oninput=show;
+fontFamily.onchange=show;
+
+wordDisplay.onclick=()=>{if(!auto.checked) show();};
+
+</script>
+
+</body>
+</html>

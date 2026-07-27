@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Считалочка</title>
+
+<style>
+:root{
+  --blue:#1E3F8A;
+  --orange:#FF6A00;
+}
+
+body{
+  margin:0;
+  font-family:Arial;
+  background:#fff;
+  color:#111;
+}
+
+.topbar{
+  background:var(--blue);
+  color:#fff;
+  text-align:center;
+  padding:18px;
+  position:sticky;
+  top:0;
+  font-style:italic;
+  font-weight:700;
+  font-size:28px;
+}
+
+.toggle{
+  position:absolute;
+  right:10px;
+  top:10px;
+  width:42px;
+  height:42px;
+  background:var(--orange);
+  color:#fff;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:8px;
+  cursor:pointer;
+  box-shadow:0 4px 0 #c84f00;
+}
+
+/* ===== SETTINGS PANEL ===== */
+.controls{
+  display:none;
+  flex-wrap:wrap;
+  gap:12px;
+  padding:12px;
+  background:#f5f7fb;
+}
+
+.control{
+  display:flex;
+  flex-direction:column;
+  min-width:160px;
+}
+
+select,input{
+  padding:10px;
+  font-size:16px;
+  border-radius:10px;
+  border:1px solid #ddd;
+}
+
+input[type="range"]{
+  accent-color:var(--orange);
+}
+
+/* ===== DISPLAY ===== */
+.display{
+  text-align:center;
+  padding:40px 16px;
+  min-height:60vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:10px;
+}
+
+.problem{
+  font-size:80px;
+  font-weight:800;
+}
+
+.letter{
+  font-size:80px;
+  font-weight:700;
+}
+
+.author{
+  position:fixed;
+  bottom:6px;
+  right:10px;
+  font-size:11px;
+  color:#999;
+}
+
+/* ===== BUTTONS (ВЫНЕСЕНЫ ИЗ SETTINGS) ===== */
+.bottom-controls{
+  position:fixed;
+  bottom:14px;
+  left:50%;
+  transform:translateX(-50%);
+  display:flex;
+  gap:12px;
+  z-index:999;
+}
+
+button{
+  padding:12px 18px;
+  font-size:16px;
+  border:none;
+  border-radius:10px;
+  background:var(--orange);
+  color:#fff;
+  box-shadow:0 4px 0 #c84f00;
+  cursor:pointer;
+}
+
+button:active{
+  transform:translateY(2px);
+  box-shadow:0 2px 0 #c84f00;
+}
+
+@media (max-width:768px){
+  .controls{ flex-direction:column; }
+  .control{ min-width:100%; }
+  .problem{ font-size:64px; }
+  .letter{ font-size:64px; }
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+  Считалочка
+  <div class="toggle">⚙</div>
+</div>
+
+<!-- SETTINGS -->
+<div class="controls" id="panel">
+
+  <div class="control">
+    <label>Режим</label>
+    <select id="mode"></select>
+  </div>
+
+  <div class="control" id="submode"></div>
+
+  <div class="control">
+    <label>Мин 1</label>
+    <input id="min1" type="number" value="1">
+    <label>Макс 1</label>
+    <input id="max1" type="number" value="100">
+    <label>Мин 2</label>
+    <input id="min2" type="number" value="1">
+    <label>Макс 2</label>
+    <input id="max2" type="number" value="100">
+  </div>
+
+  <div class="control">
+    <label>Макс ответ</label>
+    <input id="maxResult" type="number" value="200">
+  </div>
+
+  <div class="control">
+    <label>Размер</label>
+    <input id="fontSize" type="range" min="20" max="200" value="80">
+  </div>
+
+  <div class="control">
+    <label>Скорость</label>
+    <input id="speed" type="range" min="0" max="14" value="6">
+  </div>
+
+  <div class="control">
+    <label><input type="checkbox" id="rainbow"> Радуга</label>
+    <label><input type="checkbox" id="hands" checked> Руки</label>
+  </div>
+
+  <div class="control">
+    <label><input type="checkbox" id="autoMode" checked> Авто</label>
+  </div>
+
+</div>
+
+<!-- FIXED BUTTONS (НЕ СКРЫВАЮТСЯ БОЛЬШЕ НИКОГДА) -->
+<div class="bottom-controls">
+  <button id="start">Старт / Стоп</button>
+  <button id="next">Следующий</button>
+</div>
+
+<!-- DISPLAY -->
+<div class="display">
+  <div class="problem" id="out">—</div>
+  <div class="letter" id="hand">—</div>
+</div>
+
+<div class="author">© verner</div>
+
+<script>
+
+/* ===== ENGINE (НЕ ТРОГАЮ) ===== */
+const r=(a,b)=>Math.floor(Math.random()*(b-a+1))+a;
+
+const Engine={
+ plusminus(){
+  const maxAnswer = +document.getElementById("maxResult").value || Infinity;
+  const t = document.getElementById("pmType")?.value || "both";
+
+  for(let i = 0; i < 100; i++){
+
+    let a = r(+min1.value, +max1.value);
+    let b = r(+min2.value, +max2.value);
+
+    let op = "+";
+if(t === "sub") op = "-";
+else if(t === "both") op = Math.random() < 0.5 ? "+" : "-";
+
+    if(op === "-" && a < b){
+      [a,b] = [b,a];
+    }
+
+    const result = op === "+" ? a + b : a - b;
+
+    if(result <= maxAnswer){
+      return `${a} ${op} ${b}`;
+    }
+  }
+
+  // fallback (если не нашли подходящий вариант)
+  let a = r(+min1.value, +max1.value);
+  let b = r(+min2.value, +max2.value);
+
+  let op;
+  if(t === "add") op = "+";
+  else if(t === "sub") op = "-";
+  else op = Math.random() < 0.5 ? "+" : "-";
+
+  if(op === "-" && a < b){
+    [a,b] = [b,a];
+  }
+
+  const result = op === "+" ? a + b : a - b;
+
+if(result <= maxAnswer){
+  return `${a} ${op} ${b}`;
+}
+},
+
+  muldiv(){
+    let a=r(+min1.value,+max1.value);
+    let b=r(+min2.value,+max2.value);
+    const t=document.getElementById("mdType")?.value||"both";
+    if(t==="mul") return `${a} × ${b}`;
+    if(t==="div") return `${a*b} ÷ ${b}`;
+    return Math.random()<0.5 ? `${a} × ${b}` : `${a*b} ÷ ${b}`;
+  },
+
+  fractions(){
+    const type=document.getElementById("frType")?.value||"proper";
+    const op=document.getElementById("frOp")?.value||"pm";
+
+    const proper=()=>`${r(1,8)}/${r(9,12)}`;
+    const improper=()=>`${r(10,20)}/${r(2,9)}`;
+    const mixed=()=>`${r(1,5)} ${r(1,8)}/${r(9,12)}`;
+    const decimal=()=> (Math.random()*10).toFixed(1);
+
+    const pick=()=>{
+      if(type==="proper") return proper();
+      if(type==="improper") return improper();
+      if(type==="mixed") return mixed();
+      return decimal();
+    };
+
+    const a=pick();
+    const b=pick();
+
+    if(op==="pm") return `${a} + ${b}`;
+    if(op==="md") return `${a} × ${b}`;
+    return `${a} ÷ ${b}`;
+  }
+};
+
+/* ===== UI ===== */
+const out=document.getElementById("out");
+const hand=document.getElementById("hand");
+const panel=document.getElementById("panel");
+const mode=document.getElementById("mode");
+const autoMode=document.getElementById("autoMode");
+const speed=document.getElementById("speed");
+const fontSize=document.getElementById("fontSize");
+
+const modes={
+  plusminus:Engine.plusminus,
+  muldiv:Engine.muldiv,
+  fractions:Engine.fractions
+};
+
+Object.keys(modes).forEach(m=>{
+  let o=document.createElement("option");
+  o.value=m;
+  o.textContent=m;
+  mode.appendChild(o);
+});
+
+mode.selectedIndex = 0;
+
+/* FONT SIZE */
+function applyFont(){
+  out.style.fontSize = fontSize.value + "px";
+}
+fontSize.oninput = applyFont;
+applyFont();
+
+/* SUBMODE */
+const submodes={
+  plusminus:`<label>+/-</label><select id="pmType"><option value="add">+</option><option value="sub">-</option><option value="both">±</option></select>`,
+  muldiv:`<label>×/÷</label><select id="mdType"><option value="mul">×</option><option value="div">÷</option><option value="both">×/÷</option></select>`,
+  fractions:`<label>Дроби</label><select id="frType"><option value="proper">обыкн</option><option value="improper">неправ</option><option value="mixed">смеш</option><option value="decimal">десят</option></select>
+             <label>Операции</label><select id="frOp"><option value="pm">+/-</option><option value="md">×/÷</option><option value="div">÷</option></select>`
+};
+
+const sub=document.getElementById("submode");
+
+mode.onchange=()=>{
+  sub.innerHTML=submodes[mode.value];
+};
+mode.onchange();
+
+/* SAFE RENDER */
+function render(){
+  try{
+    out.textContent=modes[mode.value]();
+
+    if(document.getElementById("rainbow")?.checked){
+      const rainbow=["#FF0000","#FF7A00","#FFFF00","#00FF00","#00BFFF","#0000FF","#8B00FF"];
+      out.style.color = rainbow[Math.floor(Math.random()*rainbow.length)];
+    } else {
+      out.style.color="#111";
+    }
+
+    hand.textContent=document.getElementById("hands")?.checked
+      ?["Л","П","О"][Math.floor(Math.random()*3)]
+      :"";
+  } catch(e){
+    out.textContent="—";
+  }
+}
+
+/* LOOP */
+let running=false;
+let timer=null;
+
+const speedMap=[
+  4000,3500,3000,2500,2000,1750,1500,1250,
+  1000,750,500,400,300,200,100
+];
+
+function loop(){
+  if(!running || !autoMode.checked) return;
+  render();
+  timer=setTimeout(loop,speedMap[speed.value]);
+}
+
+/* BUTTONS */
+document.getElementById("start").onclick=()=>{
+  running=!running;
+  if(running) loop();
+};
+
+document.getElementById("next").onclick=()=>{
+  render();
+};
+
+/* TOGGLE SETTINGS */
+document.querySelector(".toggle").onclick=()=>{
+  panel.style.display = panel.style.display==="flex" ? "none" : "flex";
+};
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,1047 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Найди пару ✨</title>
+
+
+<style>
+
+*{
+    box-sizing:border-box;
+    font-family:Arial,sans-serif;
+}
+
+
+body{
+    margin:0;
+    background:#f3f5fb;
+    color:#222;
+}
+
+
+header{
+    background:#1E3F8A;
+    color:white;
+    padding:15px;
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+}
+
+
+.container{
+    max-width:900px;
+    margin:auto;
+    padding:20px;
+    text-align:center;
+}
+
+
+button{
+    background:#FF6A00;
+    border:0;
+    color:white;
+    padding:12px 25px;
+    border-radius:12px;
+    font-size:20px;
+    cursor:pointer;
+    box-shadow:0 4px 0 #c94f00;
+}
+
+
+button:active{
+    transform:translateY(3px);
+    box-shadow:0 1px 0 #c94f00;
+}
+
+
+.tables{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:10px;
+    margin:20px;
+}
+
+
+.tableBtn{
+    background:white;
+    color:#1E3F8A;
+    border:2px solid #1E3F8A;
+    box-shadow:none;
+    width:55px;
+    height:45px;
+    padding:0;
+}
+
+
+.tableBtn.active{
+    background:#FF6A00;
+    color:white;
+    border-color:#FF6A00;
+}
+
+
+select{
+    font-size:18px;
+    padding:10px;
+    border-radius:10px;
+    margin:10px;
+}
+
+
+.stats{
+    display:flex;
+    justify-content:center;
+    gap:30px;
+    font-size:20px;
+    margin:20px;
+}
+
+
+#game{
+    display:grid;
+    gap:15px;
+    justify-content:center;
+}
+
+
+.card{
+    width:110px;
+    height:110px;
+    perspective:600px;
+    cursor:pointer;
+}
+
+
+.inner{
+    width:100%;
+    height:100%;
+    transition:.35s;
+    transform-style:preserve-3d;
+    position:relative;
+}
+
+
+.card.open .inner{
+    transform:rotateY(180deg);
+}
+
+
+.side{
+    position:absolute;
+    width:100%;
+    height:100%;
+    backface-visibility:hidden;
+    border-radius:15px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:25px;
+    font-weight:bold;
+}
+
+
+.front{
+    background:#1E3F8A;
+    color:white;
+}
+
+
+.back{
+    background:white;
+    transform:rotateY(180deg);
+    box-shadow:0 5px 15px #ccc;
+}
+
+
+.card.good .back{
+    background:#b9f6ca;
+}
+
+
+.card.bad .back{
+    background:#ffcdd2;
+}
+
+.card.found{
+    visibility:hidden;
+    pointer-events:none;
+}
+
+.board{
+
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:40px;
+max-width:700px;
+margin:auto;
+
+}
+
+
+
+.column{
+
+display:grid;
+grid-template-columns:repeat(2,110px);
+gap:10px;
+justify-content:center;
+
+}
+
+
+
+.preview{
+
+font-size:24px;
+font-weight:bold;
+color:#FF6A00;
+margin:15px;
+
+}
+
+
+
+.memoryBar{
+
+height:15px;
+background:#ddd;
+border-radius:10px;
+overflow:hidden;
+max-width:400px;
+margin:10px auto 20px;
+
+}
+
+
+
+#memoryProgress{
+
+height:100%;
+width:100%;
+background:#FF6A00;
+transition:width 1s linear;
+
+}
+
+#win{
+    display:none;
+    font-size:30px;
+    margin-top:30px;
+}
+
+
+@media(max-width:600px){
+
+.card{
+    width:75px;
+    height:75px;
+}
+
+
+.side{
+    font-size:18px;
+}
+
+.column{
+
+grid-template-columns:repeat(2,75px);
+
+}
+
+
+.board{
+
+gap:15px;
+
+}
+
+}
+
+
+</style>
+
+</head>
+
+<body>
+
+
+<header>
+✨ Найди пару
+</header>
+
+
+
+<div class="container">
+
+
+
+<div id="menu">
+
+
+<h2>Таблица умножения</h2>
+
+
+
+<div class="tables">
+
+
+<button class="tableBtn active" onclick="chooseTable(0,this)">
+Все
+</button>
+
+
+<button class="tableBtn" onclick="chooseTable(2,this)">2</button>
+<button class="tableBtn" onclick="chooseTable(3,this)">3</button>
+<button class="tableBtn" onclick="chooseTable(4,this)">4</button>
+<button class="tableBtn" onclick="chooseTable(5,this)">5</button>
+<button class="tableBtn" onclick="chooseTable(6,this)">6</button>
+<button class="tableBtn" onclick="chooseTable(7,this)">7</button>
+<button class="tableBtn" onclick="chooseTable(8,this)">8</button>
+<button class="tableBtn" onclick="chooseTable(9,this)">9</button>
+
+
+</div>
+
+
+
+
+<select id="level">
+
+<option value="6">
+6 пар
+</option>
+
+<option value="10" selected>
+10 пар
+</option>
+
+<option value="15">
+15 пар
+</option>
+
+</select>
+
+
+<select id="memoryTime">
+
+<option value="10">
+10 секунд
+</option>
+
+<option value="15">
+15 секунд
+</option>
+
+<option value="20" selected>
+20 секунд
+</option>
+
+<option value="25">
+25 секунд
+</option>
+
+</select>
+
+
+<br>
+
+
+<button onclick="startGame()">
+▶ Начать
+</button>
+
+
+</div>
+
+
+
+
+
+<div id="play" style="display:none">
+
+
+<div class="stats">
+
+
+<div>
+Пары:
+<span id="pairs">0</span>
+</div>
+
+
+<div>
+Ходы:
+<span id="moves">0</span>
+</div>
+
+
+<div>
+⏱
+<span id="time">0</span>
+</div>
+
+
+</div>
+
+
+
+
+<div class="preview" id="preview">
+</div>
+
+
+<div class="memoryBar">
+
+<div id="memoryProgress"></div>
+
+</div>
+
+
+
+<div class="board">
+
+
+<div>
+
+<h3>
+Примеры
+</h3>
+
+<div id="questions" class="column"></div>
+
+</div>
+
+
+
+
+<div>
+
+<h3>
+Ответы
+</h3>
+
+<div id="answers" class="column"></div>
+
+</div>
+
+
+</div>
+
+
+
+
+
+<div id="win">
+
+
+🎉 Победа!
+
+
+<br><br>
+
+
+<button onclick="startGame()">
+Ещё раз
+</button>
+
+
+</div>
+
+
+
+</div>
+
+
+</div>
+
+
+
+
+
+<script>
+
+
+let selectedTable = 0;
+
+
+let questions = [];
+
+let answers = [];
+
+let opened = [];
+
+let lock = false;
+
+
+let pairs = 0;
+
+let moves = 0;
+
+
+let memoryTimer = null;
+
+
+
+
+function chooseTable(num,btn){
+
+
+selectedTable = num;
+
+
+document.querySelectorAll(".tableBtn")
+.forEach(x=>x.classList.remove("active"));
+
+
+btn.classList.add("active");
+
+
+}
+
+function startGame(){
+
+
+document.getElementById("menu").style.display="none";
+
+document.getElementById("play").style.display="block";
+
+
+document.getElementById("win").style.display="none";
+
+
+pairs=0;
+
+moves=0;
+
+opened=[];
+
+lock=false;
+
+
+document.getElementById("pairs").textContent=0;
+
+document.getElementById("moves").textContent=0;
+
+
+let count = Number(
+document.getElementById("level").value
+);
+
+
+// защита от зависания
+if(selectedTable && count>8){
+
+count=8;
+
+}
+
+
+
+let examples = generateExamples(
+selectedTable,
+count
+);
+
+
+
+questions=[];
+
+answers=[];
+
+
+
+examples.forEach(x=>{
+
+
+questions.push({
+
+id:x.answer,
+
+text:x.question
+
+});
+
+
+
+answers.push({
+
+id:x.answer,
+
+text:x.answer
+
+});
+
+
+});
+
+
+
+questions.sort(()=>Math.random()-0.5);
+
+answers.sort(()=>Math.random()-0.5);
+
+
+
+drawCards();
+
+
+startMemory();
+
+
+
+}
+
+function generateExamples(table,count){
+
+
+let result=[];
+
+let attempts=0;
+
+
+
+while(result.length<count && attempts<500){
+
+
+attempts++;
+
+
+let a;
+
+let b;
+
+
+
+if(table){
+
+a=table;
+
+}
+
+else{
+
+a=Math.floor(Math.random()*8)+2;
+
+}
+
+
+
+b=Math.floor(Math.random()*8)+2;
+
+
+
+let answer=a*b;
+
+
+
+let exists=result.some(x=>
+
+x.question===`${a}×${b}`
+
+);
+
+
+
+if(!exists){
+
+
+result.push({
+
+question:`${a}×${b}`,
+
+answer:answer
+
+});
+
+
+}
+
+
+
+}
+
+
+
+return result;
+
+
+}
+
+
+function drawCards(){
+
+
+let qBox=document.getElementById("questions");
+
+let aBox=document.getElementById("answers");
+
+
+qBox.innerHTML="";
+
+aBox.innerHTML="";
+
+
+
+questions.forEach(card=>{
+
+qBox.appendChild(createCard(card,"question"));
+
+});
+
+
+answers.forEach(card=>{
+
+aBox.appendChild(createCard(card,"answer"));
+
+});
+
+
+}
+
+function createCard(card,type){
+
+
+let div=document.createElement("div");
+
+
+div.className="card";
+
+
+div.dataset.type=type;
+
+
+
+div.innerHTML=`
+
+<div class="inner">
+
+
+<div class="side front">
+?
+</div>
+
+
+<div class="side back">
+${card.text}
+</div>
+
+
+</div>
+
+`;
+
+
+
+div.onclick=()=>openCard(div,card);
+
+
+
+return div;
+
+
+}
+
+
+function startMemory(){
+
+
+let cards=document.querySelectorAll(".card");
+
+
+let time=Number(
+document.getElementById("memoryTime").value
+);
+
+
+let maxTime=time;
+
+
+let bar=document.getElementById("memoryProgress");
+
+let text=document.getElementById("preview");
+
+
+
+text.textContent=
+"🧠 Запоминай: "+time+" сек";
+
+
+
+cards.forEach(card=>{
+
+card.classList.add("open");
+
+});
+
+
+
+bar.style.width="100%";
+
+
+
+clearInterval(memoryTimer);
+
+
+
+memoryTimer=setInterval(()=>{
+
+
+time--;
+
+
+text.textContent=
+"🧠 Запоминай: "+time+" сек";
+
+
+
+bar.style.width=
+(time/maxTime*100)+"%";
+
+
+
+
+if(time<=0){
+
+
+
+clearInterval(memoryTimer);
+
+
+
+cards.forEach(card=>{
+
+card.classList.remove("open");
+
+});
+
+
+
+text.textContent=
+"🔍 Ищи пары!";
+
+
+
+bar.style.width="0%";
+
+
+
+}
+
+
+},1000);
+
+
+
+}
+
+function openCard(element,card){
+
+
+
+if(lock)
+return;
+
+
+
+if(element.classList.contains("open"))
+return;
+
+
+
+element.classList.add("open");
+
+
+
+opened.push({
+
+element,
+
+card
+
+});
+
+
+if(opened.length===2){
+
+
+if(opened[0].element.dataset.type === 
+opened[1].element.dataset.type){
+
+
+opened[0].element.classList.remove("open");
+
+opened[1].element.classList.remove("open");
+
+
+opened=[];
+
+return;
+
+}
+
+
+moves++;
+
+
+document.getElementById("moves").textContent=moves;
+
+
+
+check();
+
+
+
+}
+
+
+
+}
+
+
+
+
+
+
+
+function check(){
+
+
+
+lock=true;
+
+
+
+let a=opened[0];
+
+let b=opened[1];
+
+
+
+
+
+if(a.card.id===b.card.id){
+
+
+
+setTimeout(()=>{
+
+
+a.element.classList.add("good");
+
+b.element.classList.add("good");
+
+
+
+setTimeout(()=>{
+
+
+a.element.classList.add("found");
+
+b.element.classList.add("found");
+
+
+
+},500);
+
+
+
+pairs++;
+
+
+document.getElementById("pairs").textContent=pairs;
+
+
+
+opened=[];
+
+
+lock=false;
+
+
+
+
+
+if(pairs===questions.length){
+
+
+clearInterval(memoryTimer);
+
+
+document.getElementById("win").style.display="block";
+
+
+}
+
+
+
+},400);
+
+
+
+}
+
+
+
+
+else{
+
+
+
+setTimeout(()=>{
+
+
+
+a.element.classList.add("bad");
+
+b.element.classList.add("bad");
+
+
+
+
+setTimeout(()=>{
+
+
+
+a.element.classList.remove("open","bad");
+
+b.element.classList.remove("open","bad");
+
+
+
+opened=[];
+
+
+lock=false;
+
+
+
+},500);
+
+
+
+},300);
+
+
+
+}
+
+
+
+}
+
+
+
+</script>
+
+
+
+</body>
+
+</html>

@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Скорочтение +</title>
+
+<style>
+:root{
+  --blue:#1E3F8A;
+  --orange:#FF6A00;
+  --btn:#2f5fb3;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f4f6fb;
+}
+
+/* ===== PANEL ===== */
+header{
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  background:var(--blue);
+  color:#fff;
+  padding:10px;
+  z-index:1000;
+  box-shadow:0 4px 12px rgba(0,0,0,.18);
+  transition:.25s;
+}
+
+header.hiddenPanel{
+  transform:translateY(-100%);
+}
+
+header h1{
+  margin:0 0 10px;
+  text-align:center;
+  font-size:22px;
+  font-style:italic;
+}
+
+.grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:8px;
+}
+
+.block{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+
+label{
+  font-size:14px;
+}
+
+textarea,
+select,
+button,
+input[type=file]{
+  width:100%;
+  border:none;
+  border-radius:8px;
+  font-size:16px;
+}
+
+textarea{
+  padding:8px;
+  min-height:90px;
+  resize:vertical;
+}
+
+select,
+input[type=file]{
+  padding:8px;
+}
+
+button{
+  padding:10px;
+  background:var(--btn);
+  color:#fff;
+  font-weight:700;
+  box-shadow:0 4px 0 rgba(0,0,0,.25);
+}
+
+button:active{
+  transform:translateY(2px);
+  box-shadow:0 2px 0 rgba(0,0,0,.25);
+}
+
+input[type=range]{
+  width:100%;
+  accent-color:var(--orange);
+}
+
+.hidden{
+  display:none !important;
+}
+
+/* ===== TEXT ===== */
+#textContainer{
+  margin:470px 10px 40px;
+  background:#fff;
+  border-radius:14px;
+  min-height:320px;
+  padding:16px;
+  font-size:28px;
+  line-height:1.65;
+  position:relative;
+  overflow:hidden;
+  box-shadow:0 4px 14px rgba(0,0,0,.08);
+  word-break:break-word;
+}
+
+/* ===== EFFECTS ===== */
+.flip{
+  transform:rotate(180deg);
+}
+
+.shutter::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  pointer-events:none;
+  background:repeating-linear-gradient(
+    to right,
+    transparent 0,
+    transparent var(--visible-width),
+    white var(--visible-width),
+    white calc(var(--visible-width) + var(--hide-width))
+  );
+}
+
+.mask-top span,
+.mask-bottom span{
+  position:relative;
+}
+
+.mask-top span::after{
+  content:"";
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:var(--mask-percent);
+  background:#fff;
+}
+
+.mask-bottom span::after{
+  content:"";
+  position:absolute;
+  left:0;
+  bottom:0;
+  width:100%;
+  height:var(--mask-percent);
+  background:#fff;
+}
+
+/* ===== TOGGLE BUTTON (ШЕСТЁРЕНКА) ===== */
+#toggleBtn{
+  position:fixed;
+  right:10px;
+  top:10px;
+  z-index:1200;
+  width:auto;
+  padding:8px 12px;
+  background:var(--orange);   /* 👈 ОРАНЖЕВЫЙ ЦВЕТ */
+  color:#fff;
+  font-weight:700;
+  border:none;
+  border-radius:10px;
+  box-shadow:0 4px 0 rgba(0,0,0,.25);
+}
+
+#toggleBtn:active{
+  transform:translateY(2px);
+  box-shadow:0 2px 0 rgba(0,0,0,.25);
+}
+
+/* ===== AUTHOR ===== */
+#verner{
+  position:fixed;
+  right:10px;
+  bottom:6px;
+  font-size:11px;
+  opacity:.55;
+}
+
+/* ===== MOBILE ===== */
+@media(max-width:700px){
+
+header h1{
+  font-size:20px;
+}
+
+label,
+select,
+button,
+textarea,
+input[type=file]{
+  font-size:16px;
+}
+
+#textContainer{
+  margin-top:690px;
+  font-size:22px;
+  padding:14px;
+}
+}
+</style>
+</head>
+
+<body>
+
+<button id="toggleBtn">⚙</button>
+
+<header id="panel">
+
+<h1>Скорочтение +</h1>
+
+<div class="grid">
+
+<div class="block" style="grid-column:1/-1;">
+<label>Текст</label>
+<textarea id="textInput">Жили-были дед да баба.</textarea>
+</div>
+
+<div class="block">
+<label>Файл .txt</label>
+<input type="file" id="fileInput" accept=".txt">
+</div>
+
+<div class="block">
+<label>Тексты</label>
+<select id="savedTexts">
+<option value="">— выбрать —</option>
+</select>
+</div>
+
+<div class="block">
+<label>Шрифт</label>
+<select id="fontSelect">
+<option value="Arial">Arial</option>
+<option value="Verdana">Verdana</option>
+<option value="Georgia">Georgia</option>
+<option value="'Times New Roman'">Times</option>
+<option value="'Courier New',monospace">Mono</option>
+</select>
+</div>
+
+<div class="block">
+<label>Размер</label>
+<input type="range" id="fontSize" min="16" max="60" value="28">
+</div>
+
+<div class="block">
+<label>Помеха</label>
+<select id="noiseSelect">
+<option value="none">Без</option>
+<option value="tilt">Наклон</option>
+<option value="maskTop">Закрыт верх</option>
+<option value="maskBottom">Закрыт низ</option>
+<option value="flip">180°</option>
+<option value="shutter">Шторка</option>
+</select>
+</div>
+
+<div class="block hidden" id="tiltBlock">
+<label>Наклон <span id="tiltVal">15°</span></label>
+<input type="range" id="tiltStrength" min="0" max="45" value="15">
+</div>
+
+<div class="block hidden" id="intensityBlock">
+<label>Интенсивность <span id="intensityVal">50%</span></label>
+<input type="range" id="intensity" min="10" max="80" value="50">
+</div>
+
+</div>
+</header>
+
+<div id="textContainer"></div>
+<div id="verner">verner</div>
+
+<script>
+const panel = document.getElementById("panel");
+const toggleBtn = document.getElementById("toggleBtn");
+
+const textInput = document.getElementById("textInput");
+const fileInput = document.getElementById("fileInput");
+const savedSelect = document.getElementById("savedTexts");
+
+const fontSelect = document.getElementById("fontSelect");
+const fontSize = document.getElementById("fontSize");
+
+const noiseSelect = document.getElementById("noiseSelect");
+const tiltStrength = document.getElementById("tiltStrength");
+const intensity = document.getElementById("intensity");
+
+const tiltBlock = document.getElementById("tiltBlock");
+const intensityBlock = document.getElementById("intensityBlock");
+
+const tiltVal = document.getElementById("tiltVal");
+const intensityVal = document.getElementById("intensityVal");
+
+const container = document.getElementById("textContainer");
+
+let savedTexts = [];
+
+/* panel */
+toggleBtn.onclick = () => {
+  panel.classList.toggle("hiddenPanel");
+};
+
+/* json */
+fetch("./texts.json?v=" + Date.now())
+.then(r => r.json())
+.then(data => {
+  if(Array.isArray(data)){
+    savedTexts = data;
+
+    savedSelect.innerHTML = '<option value="">— выбрать —</option>';
+
+    savedTexts.forEach((t,i)=>{
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = t.length > 36 ? t.slice(0,36) + "..." : t;
+      savedSelect.appendChild(opt);
+    });
+
+    if(savedTexts.length){
+      textInput.value = savedTexts[0];
+      renderText();
+    }
+  }
+});
+
+/* controls */
+function updateControls(){
+  tiltBlock.classList.add("hidden");
+  intensityBlock.classList.add("hidden");
+
+  if(noiseSelect.value === "tilt"){
+    tiltBlock.classList.remove("hidden");
+  }
+
+  if(["maskTop","maskBottom","shutter"].includes(noiseSelect.value)){
+    intensityBlock.classList.remove("hidden");
+  }
+
+  tiltVal.textContent = tiltStrength.value + "°";
+  intensityVal.textContent = intensity.value + "%";
+}
+
+function wrapLetters(text){
+  return text.split("").map(ch=>{
+    if(ch === " ") return " ";
+    if(ch === "\n") return "<br>";
+    return "<span>" + ch + "</span>";
+  }).join("");
+}
+
+/* render */
+function renderText(){
+  const text = textInput.value;
+  const mode = noiseSelect.value;
+
+  container.className = "";
+  container.style.fontFamily = fontSelect.value;
+  container.style.fontSize = fontSize.value + "px";
+
+  if(mode === "none"){
+    container.innerText = text;
+    return;
+  }
+
+  if(mode === "tilt"){
+    container.innerHTML = wrapLetters(text);
+
+    container.querySelectorAll("span").forEach(el=>{
+      const angle = Math.random() * tiltStrength.value * 2 - tiltStrength.value;
+      el.style.display = "inline-block";
+      el.style.transform = "rotate(" + angle + "deg)";
+    });
+    return;
+  }
+
+  if(mode === "maskTop"){
+    container.innerHTML = wrapLetters(text);
+    container.style.setProperty("--mask-percent", intensity.value + "%");
+    container.classList.add("mask-top");
+    return;
+  }
+
+  if(mode === "maskBottom"){
+    container.innerHTML = wrapLetters(text);
+    container.style.setProperty("--mask-percent", intensity.value + "%");
+    container.classList.add("mask-bottom");
+    return;
+  }
+
+  if(mode === "flip"){
+    container.innerText = text;
+    container.classList.add("flip");
+    return;
+  }
+
+  if(mode === "shutter"){
+    container.innerText = text;
+
+    const visible = 40 - intensity.value / 2;
+    const hidden = 4 + intensity.value / 5;
+
+    container.style.setProperty("--visible-width", visible + "px");
+    container.style.setProperty("--hide-width", hidden + "px");
+
+    container.classList.add("shutter");
+    return;
+  }
+}
+
+/* events */
+textInput.oninput = renderText;
+
+savedSelect.onchange = function(){
+  const i = parseInt(this.value,10);
+  if(isNaN(i)) return;
+  textInput.value = savedTexts[i];
+  renderText();
+};
+
+fontSelect.onchange = renderText;
+fontSize.oninput = renderText;
+
+noiseSelect.onchange = () => {
+  updateControls();
+  renderText();
+};
+
+tiltStrength.oninput = () => {
+  updateControls();
+  renderText();
+};
+
+intensity.oninput = () => {
+  updateControls();
+  renderText();
+};
+
+fileInput.onchange = function(e){
+  const file = e.target.files[0];
+  if(!file) return;
+
+  const r = new FileReader();
+  r.onload = ev => {
+    textInput.value = ev.target.result;
+    renderText();
+  };
+  r.readAsText(file);
+};
+
+updateControls();
+renderText();
+</script>
+
+</body>
+</html>
