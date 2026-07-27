@@ -32,8 +32,6 @@ body{
 }
 
 
-/* HEADER */
-
 header{
     background:var(--blue);
     color:white;
@@ -114,7 +112,6 @@ h1{
 }
 
 
-/* CONTENT */
 
 .container{
 
@@ -138,6 +135,7 @@ h1{
 }
 
 
+
 .card{
 
     background:white;
@@ -150,9 +148,9 @@ h1{
 
     display:flex;
 
-    justify-content:space-between;
-
     align-items:center;
+
+    justify-content:space-between;
 
     cursor:pointer;
 
@@ -181,6 +179,7 @@ h1{
 }
 
 
+
 .left{
 
     display:flex;
@@ -200,6 +199,8 @@ h1{
 
     font-size:34px;
 
+    font-weight:800;
+
 }
 
 
@@ -209,9 +210,8 @@ h1{
 
     font-size:40px;
 
-    font-weight:800;
-
 }
+
 
 
 .title{
@@ -234,6 +234,7 @@ h1{
 }
 
 
+
 footer{
 
     text-align:center;
@@ -245,7 +246,6 @@ footer{
     font-size:12px;
 
 }
-
 
 </style>
 
@@ -291,6 +291,7 @@ footer{
 </div>
 
 
+
 <div class="header-buttons">
 
 <button class="icon-btn">
@@ -320,92 +321,128 @@ footer{
 
 
 <div class="card" onclick="openTrainer('Shulte.html')">
+
 <div class="left">
 <div class="icon">📋</div>
 <div class="title">Шульте</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
 
 
 
-<div class="card" onclick="openTrainer('chitaem/chitaem.html')">
+
+<div class="card" onclick="openTrainer('chitaem/chitalka.html')">
+
 <div class="left">
 <div class="icon">📖</div>
 <div class="title">Читалка</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
+
 
 
 
 <div class="card" onclick="openTrainer('alfabet.html')">
+
 <div class="left">
 <div class="icon letter">А</div>
 <div class="title">Алфавит</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
+
 
 
 
 <div class="card" onclick="openTrainer('putal.html')">
+
 <div class="left">
 <div class="icon">🧠</div>
 <div class="title">Анаграммы</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
+
 
 
 
 <div class="card" onclick="openTrainer('raduga.html')">
+
 <div class="left">
 <div class="icon">🌈</div>
 <div class="title">Радуга</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
+
 
 
 
 <div class="card" onclick="openTrainer('pereverton.html')">
+
 <div class="left">
 <div class="icon">🔄</div>
 <div class="title">Перевёртыши</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
 
 
 
-<div class="card" onclick="openTrainer('stolbiky/stolbiky.html')">
+
+<div class="card" onclick="openTrainer('stolbiky/stolby.html')">
+
 <div class="left">
 <div class="icon">🐌</div>
 <div class="title">Столбики</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
 
 
 
-<div class="card" onclick="openTrainer('bystro_chitaem/bystro_chitaem.html')">
+
+<div class="card" onclick="openTrainer('bystro_chitaem/lavina.html')">
+
 <div class="left">
 <div class="icon">🏔️</div>
 <div class="title">Лавина</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
+
 
 
 
 <div class="card" onclick="openTrainer('slogi/slogi.html')">
+
 <div class="left">
 <div class="icon">🔤</div>
 <div class="title">Слоги</div>
 </div>
+
 <div class="arrow">›</div>
+
 </div>
+
 
 
 
@@ -421,6 +458,7 @@ footer{
 
 <script>
 
+
 function goBack(){
 
     location.href="../index.html";
@@ -433,6 +471,7 @@ function openTrainer(path){
     location.href=path;
 
 }
+
 
 </script>
 
