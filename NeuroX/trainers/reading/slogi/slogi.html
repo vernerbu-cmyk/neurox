@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Учимся читать</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial, sans-serif;
+background:#f5f6f8;
+display:flex;
+flex-direction:column;
+align-items:center;
+}
+
+header{
+width:100%;
+background:#1E3F8A;
+color:#fff;
+display:grid;
+grid-template-columns:1fr auto 1fr;
+align-items:center;
+padding:10px 12px;
+box-sizing:border-box;
+}
+
+#title{
+font-size:26px;
+font-style:italic;
+font-weight:600;
+text-align:center;
+}
+
+#settings{
+width:100%;
+background:#1E3F8A;
+padding:10px;
+box-sizing:border-box;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:10px;
+}
+
+.levelBar{
+width:90%;
+max-width:320px;
+display:flex;
+flex-wrap:wrap;
+gap:6px;
+}
+
+.lvl{
+flex:1;
+padding:8px 0;
+border:none;
+border-radius:8px;
+background:#2c4f9e;
+color:#fff;
+font-weight:600;
+cursor:pointer;
+box-shadow:0 3px 0 #16356f;
+}
+
+.lvl.active{
+background:#FF6A00;
+box-shadow:0 3px 0 #c94f00;
+}
+
+input[type=range]{
+width:90%;
+max-width:320px;
+accent-color:#FF6A00;
+}
+
+label{
+color:#fff;
+font-size:14px;
+display:flex;
+gap:6px;
+align-items:center;
+font-family:system-ui;
+}
+
+#syllable{
+font-weight:bold;
+margin-top:60px;
+text-align:center;
+color:#111;
+font-size:96px;
+}
+
+#extraLetter{
+font-size:46px;
+margin-top:10px;
+text-align:center;
+color:#333;
+}
+
+button{
+border:none;
+padding:10px 14px;
+border-radius:10px;
+font-size:14px;
+cursor:pointer;
+}
+
+.btn-orange{
+background:#FF6A00;
+color:#fff;
+box-shadow:0 4px 0 #c94f00;
+}
+
+#bottomControls{
+position:fixed;
+bottom:15px;
+left:50%;
+transform:translateX(-50%);
+display:flex;
+gap:12px;
+z-index:999;
+}
+
+#bottomControls button{
+min-width:140px;
+}
+
+#cenzBox{
+display:none;
+width:100%;
+background:#16356f;
+padding:10px;
+box-sizing:border-box;
+flex-direction:column;
+align-items:center;
+gap:6px;
+}
+
+#credit{
+position:fixed;
+bottom:6px;
+right:10px;
+font-size:10px;
+color:#888;
+opacity:0.7;
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+
+<div>
+<button id="cenzToggle" class="btn-orange">ценз</button>
+<button id="settingsToggle" class="btn-orange">скрыть</button>
+</div>
+
+<div id="title">Учимся читать</div>
+
+<div></div>
+
+</header>
+
+<div id="settings">
+
+<div class="levelBar"></div>
+
+<input type="range" id="speed" min="0" max="13" step="1" value="4">
+<input type="range" id="fontSize" min="60" max="140" value="96">
+
+<label><input type="checkbox" id="manualMode"> ручной режим</label>
+<label><input type="checkbox" id="advanced"> продвинутый</label>
+<label><input type="checkbox" id="highlight"> подсветка</label>
+
+<div id="cenzBox">
+<input id="bannedInput" placeholder="запрещённое сочетание">
+<button id="addBanned" class="btn-orange">добавить</button>
+<div id="bannedList"></div>
+</div>
+
+</div>
+
+<div id="syllable">--</div>
+<div id="extraLetter"></div>
+
+<div id="bottomControls">
+<button id="startBtn" class="btn-orange">Старт</button>
+<button id="nextBtn" class="btn-orange">Следующий</button>
+</div>
+
+<div id="credit">© verner</div>
+
+<script>
+
+let interval=null;
+let manual=false;
+let level=1;
+
+const speeds=[
+2000,1750,1500,1250,1000,
+900,800,700,600,500,
+400,300,200,100
+];
+
+const v=['а','е','ё','и','о','у','ы','э','ю','я'];
+const c=['б','в','г','д','ж','з','й','к','л','м','н','п','р','с','т','ф','х','ц','ч','ш','щ'];
+
+const forbiddenFirst=['й','ь','ъ'];
+
+/* RANDOM */
+function r(a){
+return a[Math.floor(Math.random()*a.length)];
+}
+
+function safeFirst(){
+let f;
+do{
+f=c[Math.floor(Math.random()*c.length)];
+}while(forbiddenFirst.includes(f));
+return f;
+}
+
+/* =========================
+   LEVELS (FIXED)
+========================= */
+
+let levels = JSON.parse(localStorage.getItem("levels")) || {
+
+1:()=>r(v)+r(c),
+
+2:()=>safeFirst()+r(v),
+
+3:()=>safeFirst()+r(v)+r(c),
+
+4:()=>safeFirst()+r(c)+r(v),
+
+5:()=>safeFirst()+r(v)+r(c),
+
+6:()=>{
+let f=safeFirst();
+while(['ж','ш','ц','й'].includes(f)) f=safeFirst();
+return f+r(v)+r(c)+"ь";
+},
+
+7:()=>{
+let f=safeFirst();
+let s=Math.random()>0.5?"ь":"ъ";
+return f+s+r(['я','ю','е','ё']);
+}
+
+};
+
+/* SAVE (future-ready) */
+function saveLevels(){
+localStorage.setItem("levels",JSON.stringify(levels));
+}
+
+/* GENERATOR */
+
+function gen(){
+
+let word;
+
+do{
+    word=levels[level]();
+}
+while(
+    bannedWords.some(b=>word.includes(b))
+);
+
+return word;
+
+}
+
+/* UI LEVELS */
+function renderLevels(){
+const bar=document.querySelector(".levelBar");
+bar.innerHTML="";
+
+Object.keys(levels).forEach(k=>{
+let b=document.createElement("button");
+b.className="lvl"+(k==level?" active":"");
+b.textContent=k;
+
+b.onclick=()=>{
+level=k;
+renderLevels();
+show();
+};
+
+bar.appendChild(b);
+});
+}
+
+renderLevels();
+
+/* SETTINGS */
+let settingsVisible=true;
+
+document.getElementById("settingsToggle").onclick=()=>{
+settingsVisible=!settingsVisible;
+document.getElementById("settings").style.display=
+settingsVisible?"flex":"none";
+document.getElementById("settingsToggle").textContent=
+settingsVisible?"скрыть":"показать";
+};
+
+/* CENZ */
+let bannedWords=[];
+
+fetch("banned.json")
+.then(response=>response.json())
+.then(data=>{
+    bannedWords=data.banned;
+})
+.catch(()=>{
+    console.log("Файл banned.json не найден");
+});
+
+document.getElementById("cenzToggle").onclick=()=>{
+let b=document.getElementById("cenzBox");
+b.style.display=b.style.display==="flex"?"none":"flex";
+};
+
+document.getElementById("addBanned").onclick=()=>{
+let v=document.getElementById("bannedInput").value.trim();
+if(!v)return;
+userBanned.push(v);
+document.getElementById("bannedList").innerHTML=userBanned.map(x=>"• "+x).join("<br>");
+document.getElementById("bannedInput").value="";
+};
+
+/* SHOW */
+function show(){
+
+let word=gen();
+
+let highlight=document.getElementById("highlight").checked;
+let adv=document.getElementById("advanced").checked;
+
+if(highlight){
+word="<span style='color:#FF6A00'>"+word[0]+"</span>"+word.slice(1);
+}
+
+document.getElementById("syllable").innerHTML=word;
+
+document.getElementById("extraLetter").textContent=
+adv ? r(['л','п','о']) : "";
+
+}
+
+/* AUTO */
+function startAuto(){
+clearInterval(interval);
+if(manual)return;
+let i=parseInt(document.getElementById("speed").value);
+interval=setInterval(show,speeds[i]);
+}
+
+/* EVENTS */
+document.getElementById("speed").oninput=()=>{
+show();
+show();
+startAuto();
+};
+
+document.getElementById("fontSize").oninput=(e)=>{
+document.getElementById("syllable").style.fontSize=e.target.value+"px";
+};
+
+document.getElementById("manualMode").onchange=(e)=>{
+manual=e.target.checked;
+clearInterval(interval);
+if(!manual)startAuto();
+};
+
+document.addEventListener("keydown",(e)=>{
+if(!manual)return;
+if(e.code==="Space"){
+e.preventDefault();
+show();
+}
+});
+
+document.getElementById("startBtn").onclick=show;
+document.getElementById("nextBtn").onclick=show;
+
+startAuto();
+
+</script>
+
+</body>
+</html>

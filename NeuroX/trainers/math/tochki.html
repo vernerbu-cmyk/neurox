@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Точки</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial,sans-serif;
+  background:#f5f7fb;
+  text-align:center;
+}
+
+.topbar{
+  background:#1E3F8A;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:6px;
+  position:sticky;
+  top:0;
+  z-index:10;
+}
+
+.title{
+  width:100%;
+  color:#fff;
+  font-size:20px;
+  font-style:italic;
+}
+
+button,select,input{font-size:14px;}
+
+button{
+  background:#FF6A00;
+  color:#fff;
+  border:none;
+  padding:8px 12px;
+  border-radius:10px;
+}
+
+#progress{margin:10px;}
+
+#grid{
+  display:grid;
+  gap:6px;
+  width:min(92vw,520px);
+  margin:0 auto 15px;
+}
+
+.cell{
+  background:#fff;
+  border:1px solid #d0d7e6;
+  border-radius:12px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  aspect-ratio:1/1;
+}
+
+/* фигуры */
+.dot,.square,.star{
+  width:55%;
+  height:55%;
+}
+
+.dot{border-radius:50%;background:#111;}
+.square{background:#111;}
+
+.triangle{
+  width:0;
+  height:0;
+  border-left:18px solid transparent;
+  border-right:18px solid transparent;
+  border-bottom:32px solid #111;
+}
+
+.star{
+  background:#111;
+  clip-path:polygon(
+    50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,
+    50% 70%,21% 91%,32% 57%,2% 35%,39% 35%
+  );
+}
+
+/* история */
+#history{
+  display:none;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  width:min(95vw,900px);
+  margin:10px auto;
+}
+
+.histGrid{
+  width:100%;
+}
+
+.histWrap{
+  border:1px solid #ccc;
+  padding:4px;
+  background:#fff;
+}
+
+.histGrid{
+  display:grid;
+  gap:2px;
+}
+
+.histCell{
+  border:1px solid #ddd;
+  aspect-ratio:1/1;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+.mini.dot{border-radius:50%;width:60%;height:60%;}
+.mini.square{width:60%;height:60%;background:#111;}
+.mini.triangle{
+  width:0;height:0;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-bottom:10px solid #111;
+}
+</style>
+</head>
+
+<body>
+
+<div class="topbar">
+
+<div class="title">Точки</div>
+
+<select id="gridSize">
+<option value="3">3×3</option>
+<option value="4">4×4</option>
+<option value="5">5×5</option>
+</select>
+
+<select id="difficulty">
+<option value="easy">Лёгкий</option>
+<option value="medium">Средний</option>
+<option value="hard">Сложный</option>
+</select>
+
+<label style="color:white;font-size:13px;">
+<input type="checkbox" id="colorMode"> Окрашивание
+</label>
+
+<label style="color:white;font-size:13px;">
+<input type="checkbox" id="autoMode"> Авто
+</label>
+
+<!-- ⏱ ДОБАВЛЕНО -->
+<label style="color:white;font-size:13px;">
+Скорость
+<input type="range" id="speed" min="500" max="5000" value="2000">
+</label>
+
+<label style="color:white;font-size:13px;">
+<input type="checkbox" id="interactive"> Интерактив
+</label>
+
+<button onclick="nextStep()">Далее</button>
+<button onclick="prevStep()">Назад</button>
+<button onclick="toggleMemory()">Запомнил</button>
+
+<!-- 🖨 ДОБАВЛЕНО -->
+<button onclick="printTemplates()">Печать</button>
+
+<button onclick="resetTrainer()">Сброс</button>
+<button onclick="toggleHistory()">История</button>
+
+<!-- ✔ ДОБАВЛЕНО -->
+<button onclick="checkResult()">Проверка</button>
+
+</div>
+
+<div id="progress">0 / 16</div>
+<div id="grid"></div>
+<div id="history"></div>
+
+<script>
+
+let step = 0;
+let historyData = [];
+let memoryHidden = false;
+let autoTimer = null;
+let userAnswers = {};
+let usedPatterns = new Set();
+
+const rainbow = ["#FF0000","#FF8C00","#FFD700","#00C800","#00A2FF","#003CFF","#8A00FF"];
+
+function getBaseCount(size){
+  if(size===3) return 3;
+  if(size===4) return 4;
+  return 5;
+}
+
+function getTypes(step,diff){
+  if(diff==="easy") return ["dot"];
+  if(diff==="medium"){
+    if(step < 12) return ["dot","square"];
+    return ["dot","square","triangle"];
+  }
+  return ["dot","square","triangle","star"];
+}
+
+function nextStep(){
+
+  memoryHidden = false;
+
+  if(step >= 16) return;
+
+  const size = +gridSize.value;
+  const diff = difficulty.value;
+  const colorMode = colorModeEl.checked;
+
+  const count = getBaseCount(size);
+  const types = getTypes(step,diff);
+
+  let figs;
+  let pattern;
+
+  do {
+
+    let used = [];
+
+    while(used.length < count){
+      let n = Math.floor(Math.random() * size * size);
+
+      if(!used.includes(n)){
+        used.push(n);
+      }
+    }
+
+    figs = used.map(i => ({
+      index: i,
+      type: types[Math.floor(Math.random() * types.length)],
+      color: colorMode
+        ? rainbow[Math.floor(Math.random() * rainbow.length)]
+        : "#111"
+    }));
+
+    // уникальный отпечаток
+    pattern = figs
+      .map(f => `${f.index}-${f.type}-${f.color}`)
+      .sort()
+      .join("|");
+
+  } while(usedPatterns.has(pattern));
+
+  usedPatterns.add(pattern);
+
+  historyData[step] = {
+    size,
+    figs: structuredClone(figs)
+  };
+
+  step++;
+  progress.textContent = step + " / 16";
+
+  drawGrid(size, figs);
+
+  autoRun();
+}
+
+function drawGrid(size, figs, hide=false){
+
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  grid.style.gridTemplateColumns = `repeat(${size},1fr)`;
+
+  for(let i=0;i<size*size;i++){
+
+    const cell = document.createElement("div");
+    cell.className = "cell";
+
+    const fig = figs.find(f => f.index === i);
+
+    // ✔ интерактивная проверка
+    cell.onclick = () => {
+
+      if(!interactive.checked) return;
+      if(!memoryHidden) return;
+
+      if(!userAnswers[step]) userAnswers[step] = new Set();
+
+      if(userAnswers[step].has(i)){
+        userAnswers[step].delete(i);
+        cell.style.background = "#fff";
+      } else {
+        userAnswers[step].add(i);
+        cell.style.background = "#d6ecff";
+      }
+    };
+
+    if(fig && !memoryHidden){
+
+      const el = document.createElement("div");
+      el.className = fig.type;
+
+      if(fig.type === "triangle"){
+        el.style.borderBottomColor = fig.color;
+      } else {
+        el.style.background = fig.color;
+      }
+
+      cell.appendChild(el);
+    }
+
+    grid.appendChild(cell);
+  }
+}
+
+/* ⏱ ДОБАВЛЕНО */
+function autoRun(){
+
+  const autoMode = document.getElementById("autoMode");
+  const speed = document.getElementById("speed");
+
+  if(!autoMode.checked) return;
+
+  clearTimeout(autoTimer);
+
+  autoTimer = setTimeout(() => {
+
+    toggleMemory();
+
+    setTimeout(() => {
+      toggleMemory();
+      nextStep();
+    }, +speed.value);
+
+  }, +speed.value);
+}
+
+function toggleMemory(){
+
+  const last = historyData[step-1];
+  if(!last) return;
+
+  memoryHidden = !memoryHidden;
+
+  drawGrid(last.size, last.figs);
+}
+
+function prevStep(){
+  if(step <= 1) return;
+  step--;
+  drawGrid(historyData[step-1].size, historyData[step-1].figs);
+  progress.textContent = step + " / 16";
+}
+
+function resetTrainer(){
+  step = 0;
+  historyData = [];
+usedPatterns.clear();
+memoryHidden = false;
+  userAnswers = {};
+  clearTimeout(autoTimer);
+  grid.innerHTML = "";
+  progress.textContent = "0 / 16";
+}
+
+/* 🖨 ПЕЧАТЬ */
+function printTemplates(){
+
+  const size = +gridSize.value;
+
+  let w = window.open("");
+
+  let html = `
+<html>
+<head>
+<style>
+@page{size:A4;margin:8mm;}
+body{margin:0;}
+.sheet{
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:6mm;
+}
+.grid{
+display:grid;
+grid-template-columns:repeat(${size},1fr);
+aspect-ratio:1/1;
+border:1px solid #000;
+}
+.cell{
+border:1px solid #000;
+aspect-ratio:1/1;
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+`;
+
+  for(let i=0;i<16;i++){
+    html += `<div class="grid">`;
+    for(let j=0;j<size*size;j++){
+      html += `<div class="cell"></div>`;
+    }
+    html += `</div>`;
+  }
+
+  html += `</div></body></html>`;
+
+  w.document.write(html);
+  w.document.close();
+  w.print();
+}
+
+/* ✔ ПРОВЕРКА */
+function checkResult(){
+
+  const last = historyData[step-1];
+  if(!last) return;
+
+  const correct = new Set(last.figs.map(f => f.index));
+  const user = userAnswers[step] || new Set();
+
+  let ok = correct.size === user.size;
+
+  for(let v of correct){
+    if(!user.has(v)) ok = false;
+  }
+
+  alert(ok ? "✔ правильно" : "✖ ошибки");
+}
+
+const gridSize = document.getElementById("gridSize");
+const difficulty = document.getElementById("difficulty");
+const colorModeEl = document.getElementById("colorMode");
+const progress = document.getElementById("progress");
+const grid = document.getElementById("grid");
+
+function toggleHistory(){
+
+  const h = document.getElementById("history");
+
+  if(h.style.display === "grid"){
+    h.style.display = "none";
+    return;
+  }
+
+  h.innerHTML = "";
+
+  historyData.forEach(item => {
+
+    const wrap = document.createElement("div");
+    wrap.className = "histWrap";
+
+    const g = document.createElement("div");
+    g.className = "histGrid";
+    g.style.display = "grid";
+    g.style.gridTemplateColumns = `repeat(${item.size}, 1fr)`;
+    g.style.gridTemplateRows = `repeat(${item.size}, 1fr)`;
+    g.style.gap = "2px";
+    g.style.aspectRatio = "1/1";
+
+    for(let i=0;i<item.size*item.size;i++){
+
+      const c = document.createElement("div");
+      c.className = "histCell";
+
+      const fig = item.figs.find(f => f.index === i);
+
+      if(fig){
+
+        const d = document.createElement("div");
+        d.className = "mini " + fig.type;
+
+        if(fig.type === "triangle"){
+          d.style.width = "0";
+          d.style.height = "0";
+          d.style.borderLeft = "6px solid transparent";
+          d.style.borderRight = "6px solid transparent";
+          d.style.borderBottom = `10px solid ${fig.color}`;
+          d.style.background = "transparent";
+        } else {
+          d.style.background = fig.color;
+        }
+
+        c.appendChild(d);
+      }
+
+      g.appendChild(c);
+    }
+
+    wrap.appendChild(g);
+    h.appendChild(wrap);
+  });
+
+  h.style.display = "grid";
+}
+
+</script>
+
+</body>
+</html>

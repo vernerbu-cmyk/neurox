@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Магический квадрат</title>
+
+<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:#f4f6fb;
+}
+
+header{
+  position:fixed;
+  top:0;left:0;right:0;
+  height:72px;
+  background:#1E3F8A;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  color:#fff;
+  font-style:italic;
+  font-weight:800;
+  font-size:22px;
+}
+
+.controls{
+  position:fixed;
+  top:72px;left:0;right:0;
+  background:#1E3F8A;
+  padding:10px;
+  display:flex;
+  flex-wrap:wrap;
+  gap:10px;
+  justify-content:center;
+}
+
+label{color:#fff;font-size:13px}
+
+select,input{
+  border:none;
+  border-radius:6px;
+  padding:6px;
+}
+
+button{
+  background:#2C5CC5;
+  color:#fff;
+  border:none;
+  padding:8px 14px;
+  border-radius:8px;
+  font-weight:700;
+  cursor:pointer;
+}
+
+#boardContainer{
+  height:100vh;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+}
+
+#board{
+  display:grid;
+  gap:8px;
+}
+
+.cell, input.cell{
+  width:clamp(40px, 12vw, 72px);
+  height:clamp(40px, 12vw, 72px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:800;
+  font-size:clamp(14px, 4vw, 24px);
+  border-radius:10px;
+  box-sizing:border-box;
+}
+
+.cell{background:#f7f9fc;cursor:pointer}
+
+.hidden{
+  background:#ffe1e1;
+  color:transparent;
+  border:2px dashed #FF6A00;
+}
+
+input.cell{
+  border:2px solid #FF6A00;
+  text-align:center;
+}
+
+#magicSum{
+  margin-top:12px;
+  font-size:20px;
+  font-weight:900;
+  text-align:center;
+}
+
+#signature{
+  position:fixed;
+  bottom:6px;
+  right:10px;
+  font-size:11px;
+  color:#888;
+}
+</style>
+</head>
+
+<body>
+
+<header>Магический квадрат</header>
+
+<div class="controls">
+
+  <label>Размер
+    <select id="size">
+      <option value="3">3×3</option>
+      <option value="5">5×5</option>
+      <option value="7">7×7</option>
+    </select>
+  </label>
+
+  <label>Сдвиг
+    <input id="shiftInput" type="number" value="0">
+  </label>
+
+  <label>Множитель
+    <input id="multInput" type="number" value="1">
+  </label>
+
+  <button onclick="generate()">Сгенерировать</button>
+  <button onclick="start()">Начать</button>
+  <button onclick="check()">Проверить</button>
+  <button onclick="savePNG()">PNG</button>
+
+</div>
+
+<div id="boardContainer">
+  <div id="board"></div>
+  <div id="magicSum"></div>
+</div>
+
+<div id="signature">© verner</div>
+
+<script>
+
+let full=[];
+let hidden=new Set();
+let started=false;
+
+/* ===== магический квадрат ===== */
+function generateMagic(n){
+  const a=Array.from({length:n},()=>Array(n).fill(0));
+  let i=0,j=Math.floor(n/2),num=1;
+
+  while(num<=n*n){
+    a[i][j]=num++;
+    let ni=(i-1+n)%n,nj=(j+1)%n;
+    if(a[ni][nj]) i=(i+1)%n;
+    else {i=ni;j=nj;}
+  }
+  return a;
+}
+
+function transform(base,shift,mult){
+  return base.map(r=>r.map(v=>v*mult+shift));
+}
+
+/* ===== render ===== */
+function render(){
+
+  const n=full.length;
+  const board=document.getElementById('board');
+
+  board.innerHTML='';
+  board.style.gridTemplateColumns=`repeat(${n},72px)`;
+
+  for(let r=0;r<n;r++){
+    for(let c=0;c<n;c++){
+
+      const id=r+'-'+c;
+
+      if(started && hidden.has(id)){
+        const inp=document.createElement('input');
+        inp.className='cell';
+        inp.dataset.r=r;
+        inp.dataset.c=c;
+        board.appendChild(inp);
+      } else {
+        const div=document.createElement('div');
+        div.className='cell';
+        div.textContent=full[r][c];
+
+        if(!started){
+          div.onclick=()=>{
+            if(hidden.has(id)) hidden.delete(id);
+            else hidden.add(id);
+            render();
+          };
+
+          if(hidden.has(id)) div.classList.add('hidden');
+        }
+
+        board.appendChild(div);
+      }
+    }
+  }
+}
+
+/* ===== FIX: generate (ГЛАВНОЕ ИСПРАВЛЕНИЕ) ===== */
+function generate(){
+
+  const n = Number(document.getElementById('size').value);
+  const shift = Number(document.getElementById('shiftInput').value);
+  const mult = Number(document.getElementById('multInput').value);
+
+  const base = generateMagic(n);
+  full = transform(base, shift, mult);
+
+  hidden.clear();
+  started = false;
+
+  render();
+
+  const sum = n*(n*n+1)/2*mult + n*shift;
+  document.getElementById('magicSum').textContent =
+    `Магическая сумма: ${sum}`;
+}
+
+/* ===== start ===== */
+function start(){
+  started=true;
+  render();
+}
+
+/* ===== check ===== */
+function check(){
+  document.querySelectorAll('input.cell').forEach(inp=>{
+    const r=+inp.dataset.r;
+    const c=+inp.dataset.c;
+
+    inp.style.background =
+      (+inp.value===full[r][c]) ? '#d9f7d9' : '#ffe1e1';
+  });
+}
+
+/* ===== PNG ===== */
+function savePNG(){
+  html2canvas(document.getElementById('board')).then(canvas=>{
+    const a=document.createElement('a');
+    a.download='magic-square.png';
+    a.href=canvas.toDataURL();
+    a.click();
+  });
+}
+
+</script>
+
+</body>
+</html>
