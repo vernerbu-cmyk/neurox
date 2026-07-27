@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>NeuroX</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --blue:#1E3F8A;
+    --orange:#FF6A00;
+    --bg:#F4F6FB;
+}
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:"Nunito Sans",sans-serif;
+    background:var(--bg);
+    color:#222;
+}
+
+/* ---------- HEADER ---------- */
+
+header{
+
+    background:var(--blue);
+    color:white;
+
+    padding:20px 24px;
+
+    box-shadow:0 4px 12px rgba(0,0,0,.15);
+
+}
+
+.header-top{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+}
+
+.brand{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:16px;
+
+}
+
+.logo{
+
+    font-size:52px;
+
+    line-height:1;
+
+}
+
+h1{
+
+    margin:0;
+
+    font-size:36px;
+
+    font-weight:800;
+
+}
+
+.subtitle{
+
+    margin-top:2px;
+
+    font-size:15px;
+
+    opacity:.9;
+
+}
+
+.header-buttons{
+
+    display:flex;
+
+    gap:10px;
+
+}
+
+.icon-btn{
+
+    width:46px;
+
+    height:46px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:rgba(255,255,255,.15);
+
+    color:white;
+
+    font-size:22px;
+
+    cursor:pointer;
+
+    transition:.18s;
+
+}
+
+.icon-btn:hover{
+
+    background:var(--orange);
+
+}
+
+.icon-btn:active{
+
+    transform:scale(.95);
+
+}
+
+/* ---------- CONTENT ---------- */
+
+.container{
+
+    max-width:700px;
+
+    margin:auto;
+
+    padding:35px 20px 50px;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:20px;
+
+    margin-bottom:18px;
+
+    padding:22px 24px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    cursor:pointer;
+
+    transition:.18s;
+
+    border-left:6px solid transparent;
+
+    box-shadow:0 8px 20px rgba(0,0,0,.08);
+
+}
+
+.card:hover{
+
+    transform:translateY(-3px);
+
+    border-left-color:var(--orange);
+
+}
+
+.card:active{
+
+    transform:scale(.985);
+
+}
+
+.left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:18px;
+
+}
+
+.icon{
+
+    font-size:34px;
+
+}
+
+.title{
+
+    font-size:28px;
+
+    font-weight:700;
+
+    color:var(--blue);
+
+}
+
+.arrow{
+
+    font-size:30px;
+
+    color:#BBB;
+
+}
+
+/* ---------- FOOTER ---------- */
+
+footer{
+
+    text-align:center;
+
+    color:#999;
+
+    padding:20px;
+
+    font-size:12px;
+
+}
+
+@media(max-width:700px){
+
+header{
+
+    padding:20px;
+
+}
+
+.logo{
+
+    font-size:46px;
+
+}
+
+h1{
+
+    font-size:34px;
+
+}
+
+.subtitle{
+
+    font-size:15px;
+
+}
+
+.title{
+
+    font-size:23px;
+
+}
+
+.icon{
+
+    font-size:28px;
+
+}
+
+.card{
+
+    padding:18px;
+
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+
+<div class="header-top">
+
+    <div class="brand">
+
+        <div class="logo">🧠</div>
+
+        <div>
+
+            <h1>NeuroX</h1>
+
+            <div class="subtitle">
+                Развитие когнитивных навыков
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="header-buttons">
+
+        <button class="icon-btn" title="Руководство" onclick="showHelp()">
+            ❔
+        </button>
+
+        <button class="icon-btn" title="Настройки" onclick="showSettings()">
+            ⚙
+        </button>
+
+    </div>
+
+</div>
+
+</header>
+
+<div class="container">
+
+<div class="card" onclick="openCategory('preschool')">
+
+<div class="left">
+<div class="icon">🧸</div>
+<div class="title">Дошколятам</div>
+</div>
+
+<div class="arrow">›</div>
+
+</div>
+
+<div class="card" onclick="openCategory('reading')">
+
+<div class="left">
+<div class="icon">📖</div>
+<div class="title">Скорочтение</div>
+</div>
+
+<div class="arrow">›</div>
+
+</div>
+
+<div class="card" onclick="openCategory('math')">
+
+<div class="left">
+<div class="icon">🔢</div>
+<div class="title">Скоросчёт</div>
+</div>
+
+<div class="arrow">›</div>
+
+</div>
+
+<div class="card" onclick="openCategory('other')">
+
+<div class="left">
+<div class="icon">🧩</div>
+<div class="title">Другое</div>
+</div>
+
+<div class="arrow">›</div>
+
+</div>
+
+</div>
+
+<footer>
+
+© verner
+
+</footer>
+
+<script>
+
+function openCategory(category){
+
+    console.log(category);
+
+    // сюда потом подключим переходы
+
+}
+
+function showHelp(){
+
+    alert("Руководство пользователя\n\nПоявится позже 🙂");
+
+}
+
+function showSettings(){
+
+    alert("Настройки\n\nПоявятся позже 🙂");
+
+}
+
+</script>
+
+</body>
+</html>
