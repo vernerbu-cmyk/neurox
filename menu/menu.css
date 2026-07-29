@@ -168,3 +168,43 @@
     transform: scale(.95);
 
 }
+
+.nx-submenu{
+
+    display:none;
+
+    padding-bottom:8px;
+
+}
+
+.nx-subitem{
+
+    display:block;
+
+    padding:10px 24px 10px 42px;
+
+    text-decoration:none;
+
+    color:#444;
+
+    font-size:18px;
+
+    transition:.15s;
+
+}
+
+.nx-subitem:hover{
+
+    background:#F4F6FB;
+
+    color:#1E3F8A;
+
+}
+
+.nx-section{
+
+    cursor:pointer;
+
+    font-weight:700;
+
+}
