@@ -80,32 +80,32 @@ const MENU = {
     ],
 
     reading: [
-        {icon:"📋", title:"Шульте", file:"/reading/shulte.html"},
-        {icon:"📖", title:"Читалка", file:"/reading/chitaem/chitalka.html"},
-        {icon:"🅰", title:"Алфавит", file:"/reading/alfabet.html"},
-        {icon:"🧠", title:"Анаграммы", file:"/reading/putal.html"},
-        {icon:"🌈", title:"Радуга", file:"/reading/raduga.html"},
-        {icon:"🔄", title:"Перевёртыши", file:"/reading/pereverton.html"},
-        {icon:"🐌", title:"Столбики", file:"/reading/stolbiky/stolby.html"},
-        {icon:"🏔", title:"Лавина", file:"/reading/bystro_chitaem/lavina.html"},
-        {icon:"🔤", title:"Слоги", file:"/reading/slogi/slogi.html"}
+        {icon:"📋", title:"Шульте", file:"reading/shulte.html"},
+        {icon:"📖", title:"Читалка", file:"reading/chitaem/chitalka.html"},
+        {icon:"🅰", title:"Алфавит", file:"reading/alfabet.html"},
+        {icon:"🧠", title:"Анаграммы", file:"reading/putal.html"},
+        {icon:"🌈", title:"Радуга", file:"reading/raduga.html"},
+        {icon:"🔄", title:"Перевёртыши", file:"reading/pereverton.html"},
+        {icon:"🐌", title:"Столбики", file:"reading/stolbiky/stolby.html"},
+        {icon:"🏔", title:"Лавина", file:"reading/bystro_chitaem/lavina.html"},
+        {icon:"🔤", title:"Слоги", file:"reading/slogi/slogi.html"}
     ],
 
     math: [
-        {icon:"🏠", title:"Домики", file:"/math/domiky.html"},
-        {icon:"🔎", title:"Найди число", file:"/math/findnumber.html"},
-        {icon:"🔲", title:"Магический квадрат", file:"/math/magic.html"},
-        {icon:"🧮", title:"Считалочка", file:"/math/primery.html"},
-        {icon:"✖", title:"Таблица умножения", file:"/math/tablitsa.html"},
-        {icon:"⚫", title:"Точки", file:"/math/tochki.html"}
+        {icon:"🏠", title:"Домики", file:"math/domiky.html"},
+        {icon:"🔎", title:"Найди число", file:"math/findnumber.html"},
+        {icon:"🔲", title:"Магический квадрат", file:"math/magic.html"},
+        {icon:"🧮", title:"Считалочка", file:"math/primery.html"},
+        {icon:"✖", title:"Таблица умножения", file:"math/tablitsa.html"},
+        {icon:"⚫", title:"Точки", file:"math/tochki.html"}
     ],
 
     other: [
-        {icon:"🌀", title:"Лабиринт", file:"/other/labyrint.html"},
-        {icon:"🃏", title:"Мемо", file:"/other/memo.html"},
-        {icon:"👀", title:"Что изменилось?", file:"/other/peremeny.html"},
-        {icon:"🚦", title:"Светофор", file:"/other/stoplight.html"},
-        {icon:"🔤", title:"Алфавит", file:"/other/alf/letalf.html"}
+        {icon:"🌀", title:"Лабиринт", file:"other/labyrint.html"},
+        {icon:"🃏", title:"Мемо", file:"other/memo.html"},
+        {icon:"👀", title:"Что изменилось?", file:"other/peremeny.html"},
+        {icon:"🚦", title:"Светофор", file:"other/stoplight.html"},
+        {icon:"🔤", title:"Алфавит", file:"other/alf/letalf.html"}
     ]
 
 };
