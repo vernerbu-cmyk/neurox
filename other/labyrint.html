@@ -141,6 +141,49 @@ canvas{
     color:#999;
 }
 
+@media(max-width:900px){
+
+    #topbar{
+        height:130px;
+        align-items:flex-start;
+        padding-top:8px;
+    }
+
+    #title{
+        top:8px;
+        font-size:22px;
+    }
+
+    #controls{
+        top:52px;
+        left:8px;
+        right:8px;
+        gap:6px;
+        flex-wrap:wrap;
+    }
+
+    #rightControls{
+        top:52px;
+        right:8px;
+        gap:6px;
+    }
+
+    button{
+        font-size:12px;
+        padding:7px 9px;
+    }
+
+    input[type="number"]{
+        width:45px;
+        height:30px;
+        font-size:13px;
+    }
+
+    #labubuLabel{
+        font-size:12px;
+    }
+}
+
 </style>
 </head>
 
@@ -188,6 +231,10 @@ const labubuWin=document.getElementById("labubuWin");
 
 let TOP=88;
 
+function updateTop(){
+    TOP=document.getElementById("topbar").offsetHeight;
+}
+
 let cols,rows,cell;
 let maze=[];
 let player;
@@ -208,13 +255,16 @@ const DIRS=[
 ];
 
 function resize(){
+    updateTop();
     canvas.width=innerWidth;
     canvas.height=innerHeight;
 
     if(cols){
+        let availableHeight=canvas.height-TOP;
+
         cell=Math.min(
             canvas.width/cols,
-            (canvas.height-TOP)/rows
+            availableHeight/rows
         );
 
         ox=(canvas.width-cols*cell)/2;
