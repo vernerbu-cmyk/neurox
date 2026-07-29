@@ -119,9 +119,7 @@ function buildMenu(){
         if(!container) return;
 
         container.innerHTML = "";
-        container.style.display = "block";
-container.style.background = "#ffeeaa";
-
+        
         MENU[section].forEach(item=>{
 
             const link = document.createElement("a");
