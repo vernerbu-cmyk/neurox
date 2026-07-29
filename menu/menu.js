@@ -59,9 +59,6 @@ document.body.insertAdjacentHTML("beforeend", `
 ⛶ Полный экран
 </a>
 
-document.getElementById("fullscreen-btn").onclick = toggleFullscreen;
-
-
 </div>
 
 `);
@@ -70,6 +67,7 @@ document.getElementById("fullscreen-btn").onclick = toggleFullscreen;
 const drawer = document.getElementById("neurox-drawer");
 const overlay = document.getElementById("neurox-overlay");
 const button = document.getElementById("neurox-menu-btn");
+const fullscreenButton = document.getElementById("fullscreen-btn");
 
 
 
@@ -91,8 +89,7 @@ function closeMenu() {
 
 
 button.onclick = openMenu;
-
-
+fullscreenButton.onclick = toggleFullscreen;
 overlay.onclick = closeMenu;
 
 
