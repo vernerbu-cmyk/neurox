@@ -184,6 +184,10 @@ canvas{
     }
 }
 
+.mobileHide{
+    display:none !important;
+}
+
 </style>
 </head>
 
@@ -229,7 +233,28 @@ const ctx=canvas.getContext("2d");
 
 const labubuWin=document.getElementById("labubuWin");
 
+function checkDevice(){
+
+    if(
+        window.innerWidth <= 700 ||
+        navigator.maxTouchPoints > 0
+    ){
+
+        document
+        .getElementById("rightControls")
+        .classList.add("mobileHide");
+
+    }
+
+}
+
+checkDevice();
+
+window.addEventListener("resize",checkDevice);
+
+
 let TOP=88;
+
 
 function updateTop(){
     TOP=document.getElementById("topbar").offsetHeight;
