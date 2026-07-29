@@ -128,7 +128,8 @@ function buildMenu(){
 
             link.innerHTML = `${item.icon} ${item.title}`;
 
-            link.href = item.file;
+            const root = "/" + location.pathname.split("/")[1];
+link.href = `${root}/${item.file}`;
 
             container.appendChild(link);
 
@@ -139,6 +140,32 @@ function buildMenu(){
 }
 
 buildMenu();
+
+document.querySelectorAll(".nx-section").forEach(section=>{
+
+    section.onclick = function(){
+
+        const id = this.dataset.section;
+
+        const submenu = document.getElementById("submenu-"+id);
+
+        const isOpen = submenu.style.display === "block";
+
+        document.querySelectorAll(".nx-submenu").forEach(menu=>{
+
+            menu.style.display = "none";
+
+        });
+
+        if(!isOpen){
+
+            submenu.style.display = "block";
+
+        }
+
+    };
+
+});
 
 
 
