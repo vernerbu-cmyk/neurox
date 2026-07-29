@@ -157,6 +157,7 @@ input[type="checkbox"]{
   <div class="title">ЛАВИНА</div>
 
   <div class="levels">
+    <button onclick="setLevel('level_05')">0.5</button>
     <button onclick="setLevel('level_1')">1</button>
     <button onclick="setLevel('level_2')">2</button>
     <button onclick="setLevel('level_3')">3</button>
@@ -235,7 +236,7 @@ fetch("texts2.json")
   .then(r=>r.json())
   .then(j=>{
     data=j;
-    setLevel("level_1");
+    setLevel("level_05");
   });
 
 function setLevel(lv){
