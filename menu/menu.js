@@ -128,7 +128,7 @@ function buildMenu(){
 
             link.innerHTML = `${item.icon} ${item.title}`;
 
-            link.href = "/neurox/" + item.file;
+            link.href = new URL(item.file, window.location.origin + "/neurox/").pathname;
 
             container.appendChild(link);
 
