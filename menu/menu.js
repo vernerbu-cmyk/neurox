@@ -128,8 +128,7 @@ function buildMenu(){
 
             link.innerHTML = `${item.icon} ${item.title}`;
 
-            const root = "/" + location.pathname.split("/")[1];
-link.href = `${root}/${item.file}`;
+            link.href = item.file;
 
             container.appendChild(link);
 
