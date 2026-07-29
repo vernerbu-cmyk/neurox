@@ -4,6 +4,10 @@ document.body.insertAdjacentHTML("beforeend", `
 ☰
 </button>
 
+<button id="fullscreen-btn">
+⛶
+</button>
+
 <div id="neurox-overlay"></div>
 
 <div id="neurox-drawer">
@@ -54,6 +58,8 @@ document.body.insertAdjacentHTML("beforeend", `
 <a class="nx-item" href="#" onclick="toggleFullscreen()">
 ⛶ Полный экран
 </a>
+
+document.getElementById("fullscreen-btn").onclick = toggleFullscreen;
 
 
 </div>
