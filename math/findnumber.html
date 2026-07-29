@@ -233,6 +233,8 @@ select{
         Заново
     </button>
 
+<button id="phoneBtn">📱 Телефон</button>
+
 </div>
 
 <button id="toggleBtn">
@@ -306,6 +308,7 @@ const DIFF = {
 let difficulty = DIFF.normal;
 
 let items = [];
+let currentNumbers = [];
 
 let target = 1;
 
@@ -313,7 +316,7 @@ let paused = false;
 
 let mouseX = -9999;
 let mouseY = -9999;
-
+let phoneMode = false;
 let pressed = false;
 
 let start = performance.now();
@@ -395,8 +398,9 @@ function showCenter(){
 
 function setTarget(){
 
-    target =
-        Math.floor(Math.random()*COUNT)+1;
+    target = currentNumbers[
+        Math.floor(Math.random() * currentNumbers.length)
+    ];
 
     targetEl.textContent =
         "Найди: " + target;
@@ -415,12 +419,14 @@ function build(){
     const W = wrap.clientWidth;
     const H = wrap.clientHeight;
 
-    const nums =
-        Array.from(
-            {length:COUNT},
-            (_,i)=>i+1
-        )
+    const nums = phoneMode
+    ? Array.from({length:99}, (_,i)=>i+1)
+        .sort(()=>Math.random()-0.5)
+        .slice(0,50)
+    : Array.from({length:99}, (_,i)=>i+1)
         .sort(()=>Math.random()-0.5);
+
+currentNumbers = [...nums];
 
     for(const n of nums){
 
@@ -440,7 +446,9 @@ function build(){
             Math.random()<0.75 ? 38 : 24;
 
         const size =
-            baseSize * difficulty.size;
+    baseSize *
+    difficulty.size *
+    (phoneMode ? 0.65 : 1);
 
         el.style.fontSize =
             size + "px";
@@ -537,6 +545,19 @@ pauseBtn.addEventListener(
     "click",
     togglePause
 );
+
+const phoneBtn = document.getElementById("phoneBtn");
+
+phoneBtn.addEventListener("click", ()=>{
+
+    phoneMode = !phoneMode;
+
+    phoneBtn.textContent =
+        phoneMode ? "🖥 ПК режим" : "📱 Телефон";
+
+    build();              // пересоздать цифры
+    start = performance.now(); // обнулить таймер (по желанию)
+});
 
 restartBtn.addEventListener(
     "click",
