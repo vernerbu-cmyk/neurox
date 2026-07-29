@@ -81,7 +81,7 @@ const MENU = {
 
     reading: [
         {icon:"📋", title:"Шульте", file:"reading/shulte.html"},
-        {icon:"📖", title:"Читалка", file:"reading/chitaem/chitalka.html"},
+        {icon:"🌫️", title:"Читалка", file:"reading/chitaem/chitalka.html"},
         {icon:"🅰", title:"Алфавит", file:"reading/alfabet.html"},
         {icon:"🧠", title:"Анаграммы", file:"reading/putal.html"},
         {icon:"🌈", title:"Радуга", file:"reading/raduga.html"},
