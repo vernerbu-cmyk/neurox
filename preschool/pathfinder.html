@@ -1,0 +1,1042 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Следопыт</title>
+
+<style>
+
+body{
+    margin:0;
+    height:100vh;
+    overflow:hidden;
+    background:white;
+    font-family:Arial,sans-serif;
+}
+
+
+/* HEADER */
+
+.header{
+    position:absolute;
+    top:0;
+    width:100%;
+    height:56px;
+
+    background:#1E3F8A;
+    color:white;
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+    font-size:1.8em;
+    font-weight:bold;
+    font-style:italic;
+}
+
+
+/* INFO */
+
+#info{
+    position:absolute;
+    top:70px;
+    width:100%;
+    text-align:center;
+
+    font-weight:bold;
+    font-size:24px;
+}
+
+#status{
+    margin-top:5px;
+    font-size:16px;
+    color:#777;
+}
+
+
+/* FIELD */
+
+#field{
+
+    position:absolute;
+
+    top:150px;
+    left:50%;
+
+    transform:translateX(-50%);
+
+    display:grid;
+
+    grid-template-columns:repeat(5,65px);
+    grid-template-rows:repeat(5,65px);
+
+    gap:5px;
+}
+
+
+.cell{
+
+    width:var(--cell-size);
+    height:var(--cell-size);
+
+    border-radius:12px;
+
+    background:#f5f5f5;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+.cell.path{
+
+    background:#FF6A00;
+
+}
+
+
+.cell.current{
+
+    background:#1E88E5;
+
+}
+
+
+.cell.start{
+
+    background:#1E3F8A;
+
+}
+
+.cell.finish{
+
+    background:#1E3F8A;
+
+    box-shadow:
+    0 0 0 3px #FF6A00;
+
+}
+
+
+/* BUTTONS */
+
+.controls{
+
+    position:absolute;
+
+    bottom:90px;
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    gap:10px;
+
+    flex-wrap:wrap;
+
+}
+
+
+button{
+
+    padding:10px 18px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#FF6A00;
+
+    color:white;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    box-shadow:
+    0 4px 0 #C85000,
+    0 6px 12px rgba(0,0,0,.25);
+
+}
+
+
+
+input[type=range]{
+
+    width:180px;
+
+    accent-color:#FF6A00;
+
+}
+
+
+
+/* ARROWS */
+
+.arrows{
+
+    position:absolute;
+
+    bottom:20px;
+
+    width:100%;
+
+    display:flex;
+
+    justify-content:center;
+
+    gap:8px;
+
+}
+
+
+.arrow{
+
+    width:45px;
+    height:45px;
+
+    padding:0;
+
+    font-size:22px;
+
+}
+
+
+
+/* FOOTER */
+
+.footer{
+
+    position:absolute;
+
+    right:10px;
+
+    bottom:5px;
+
+    font-size:10px;
+
+    color:rgba(0,0,0,.25);
+
+}
+
+.controls select,
+.controls input,
+.controls span{
+
+    accent-color:#FF6A00;
+
+}
+
+
+.controls label{
+
+    color:#1E3F8A;
+    font-weight:bold;
+
+}
+
+
+.controls select{
+
+    border:2px solid #FF6A00;
+    border-radius:10px;
+    padding:5px;
+
+}
+
+@media(max-width:700px){
+
+#field{
+    grid-template-columns:repeat(var(--size),55px);
+    grid-template-rows:repeat(var(--size),55px);
+}
+
+
+.cell{
+
+    width:var(--cell-size);
+    height:var(--cell-size);
+
+}
+
+}
+
+
+</style>
+
+</head>
+
+
+<body>
+
+
+<div class="header">
+Следопыт
+</div>
+
+
+<div id="info">
+
+<div>
+Уровень: <span id="level">1</span>
+</div>
+
+<div id="status">
+Нажмите Старт
+</div>
+
+</div>
+
+
+
+<div id="field"></div>
+
+
+
+<div class="controls">
+
+<select id="size">
+<option value="3">3×3</option>
+<option value="4">4×4</option>
+<option value="5" selected>5×5</option>
+<option value="6">6×6</option>
+</select>
+
+
+<label>
+Длина:
+<input id="length" type="range" min="3" max="18" value="5">
+<span id="lengthValue">5</span>
+</label>
+
+
+<label>
+Показ:
+<input id="showSpeed" 
+type="range" 
+min="1" 
+max="10" 
+value="4">
+<span id="showValue">600мс</span>
+</label>
+
+
+<label>
+Пауза:
+<input id="memoryTime" type="range" min="1" max="9" value="4">
+<span id="memoryValue">2с</span>
+</label>
+
+
+<button id="start">
+Старт
+</button>
+
+<button id="stop">
+Стоп
+</button>
+
+<button id="restart">
+Заново
+</button>
+
+<button id="newGame" style="display:none;">
+Новая тренировка
+</button>
+
+</div>
+
+
+
+<div class="arrows">
+
+<button class="arrow" data-dir="up">↑</button>
+<button class="arrow" data-dir="left">←</button>
+<button class="arrow" data-dir="down">↓</button>
+<button class="arrow" data-dir="right">→</button>
+
+</div>
+
+
+
+<div class="footer">
+© verner
+</div>
+
+
+
+<script>
+
+
+let SIZE=5;
+
+const field=document.getElementById("field");
+
+const levelText=document.getElementById("level");
+const status=document.getElementById("status");
+const restart=document.getElementById("restart");
+const newGame=document.getElementById("newGame");
+
+let cells=[];
+
+let route=[];
+
+let playerStep=0;
+
+let playing=false;
+
+let totalTasks = 10;
+let currentTask = 0;
+
+let correct = 0;
+let mistakes = 0;
+
+
+const sizeSelect=document.getElementById("size");
+
+const lengthRange=document.getElementById("length");
+const lengthValue=document.getElementById("lengthValue");
+
+const showSpeed=document.getElementById("showSpeed");
+
+const memoryTime=document.getElementById("memoryTime");
+const memoryValue=document.getElementById("memoryValue");
+const memorySteps=[
+    3000,
+    2500,
+    2000,
+    1500,
+    1000,
+    750,
+    500,
+    250,
+    100
+];
+
+const showSteps=[
+    1000,
+    800,
+    700,
+    600,
+    500,
+    400,
+    300,
+    200,
+    100,
+    50
+];
+
+createField();
+
+sizeSelect.onchange=()=>{
+
+    SIZE=Number(sizeSelect.value);
+
+    createField();
+
+
+    let maxLength = SIZE * SIZE - 1;
+
+    lengthRange.max = maxLength;
+
+
+    if(Number(lengthRange.value)>maxLength){
+
+        lengthRange.value=maxLength;
+        lengthValue.textContent=maxLength;
+
+    }
+
+};
+
+
+lengthRange.oninput=()=>{
+
+    lengthValue.textContent=lengthRange.value;
+
+};
+
+
+memoryTime.oninput=()=>{
+
+    let time =
+    memorySteps[memoryTime.value-1];
+
+    memoryValue.textContent =
+    time>=1000
+    ? time/1000+"с"
+    : time+"мс";
+
+};
+
+
+
+/* создаём поле */
+
+function createField(){
+
+    field.innerHTML="";
+
+    cells=[];
+
+
+let cellSize = 65;
+
+if(SIZE===3) cellSize=100;
+if(SIZE===4) cellSize=80;
+if(SIZE===5) cellSize=65;
+if(SIZE===6) cellSize=55;
+
+    field.style.setProperty(
+        "--cell-size",
+        cellSize+"px"
+    );
+
+
+field.style.gridTemplateColumns =
+`repeat(${SIZE},${cellSize}px)`;
+
+field.style.gridTemplateRows =
+`repeat(${SIZE},${cellSize}px)`;
+
+field.style.setProperty("--size", SIZE);
+
+
+    for(let y=0;y<SIZE;y++){
+
+        for(let x=0;x<SIZE;x++){
+
+
+            let cell=document.createElement("div");
+
+
+            cell.className="cell";
+
+
+            cell.dataset.x=x;
+            cell.dataset.y=y;
+
+
+
+            cell.onclick=()=>{
+
+                if(!playing) return;
+
+                checkMove(x,y);
+
+            };
+
+
+
+            field.appendChild(cell);
+
+            cells.push(cell);
+
+
+        }
+
+    }
+
+}
+
+
+
+function getCell(x,y){
+
+    return cells.find(c=>
+        +c.dataset.x===x &&
+        +c.dataset.y===y
+    );
+
+}
+
+
+
+/* генерация пути */
+
+function randomEdge(side){
+
+    if(side==="left"){
+        return {
+            x:0,
+            y:Math.floor(Math.random()*SIZE)
+        };
+    }
+
+    if(side==="right"){
+        return {
+            x:SIZE-1,
+            y:Math.floor(Math.random()*SIZE)
+        };
+    }
+
+    if(side==="top"){
+        return {
+            x:Math.floor(Math.random()*SIZE),
+            y:0
+        };
+    }
+
+    if(side==="bottom"){
+        return {
+            x:Math.floor(Math.random()*SIZE),
+            y:SIZE-1
+        };
+    }
+
+}
+
+
+
+// создаём маршрут
+
+function createRoute(length){
+
+    route=[];
+
+
+    // выбираем стартовый край
+
+    let side=Math.floor(Math.random()*4);
+
+    let x,y;
+
+
+    if(side===0){ // слева
+        x=0;
+        y=Math.floor(Math.random()*SIZE);
+    }
+
+    if(side===1){ // справа
+        x=SIZE-1;
+        y=Math.floor(Math.random()*SIZE);
+    }
+
+    if(side===2){ // сверху
+        x=Math.floor(Math.random()*SIZE);
+        y=0;
+    }
+
+    if(side===3){ // снизу
+        x=Math.floor(Math.random()*SIZE);
+        y=SIZE-1;
+    }
+
+
+    route.push({x,y});
+
+
+    let visited=new Set();
+
+    visited.add(`${x},${y}`);
+
+
+
+    let dirs=[
+        {x:1,y:0},
+        {x:-1,y:0},
+        {x:0,y:1},
+        {x:0,y:-1}
+    ];
+
+
+
+    while(route.length < length){
+
+
+        let possible=dirs
+        .map(d=>({
+            x:x+d.x,
+            y:y+d.y
+        }))
+        .filter(p=>
+            p.x>=0 &&
+            p.x<SIZE &&
+            p.y>=0 &&
+            p.y<SIZE &&
+            !visited.has(`${p.x},${p.y}`)
+        );
+
+
+
+        if(possible.length===0){
+
+            return createRoute(length);
+
+        }
+
+
+
+        let next=
+        possible[
+            Math.floor(Math.random()*possible.length)
+        ];
+
+
+
+        x=next.x;
+        y=next.y;
+
+
+        route.push({
+            x,
+            y
+        });
+
+
+        visited.add(`${x},${y}`);
+
+    }
+
+
+
+    // если последняя клетка не на краю — переделываем
+
+let last=route[route.length-1];
+
+
+// финиш должен быть на краю
+let isEdge =
+    last.x===0 ||
+    last.x===SIZE-1 ||
+    last.y===0 ||
+    last.y===SIZE-1;
+
+
+// старт и финиш не должны совпадать
+let sameStart =
+    last.x===route[0].x &&
+    last.y===route[0].y;
+
+
+if(!isEdge || sameStart){
+
+    return createRoute(length);
+
+}
+
+let distance =
+Math.abs(last.x-route[0].x)+
+Math.abs(last.y-route[0].y);
+
+
+if(distance < 2){
+
+    return createRoute(length);
+
+}
+
+
+    route.start=route[0];
+    route.finish=route[route.length-1];
+
+
+}
+
+/* показать путь */
+
+function showRoute(){
+
+    cells.forEach(c=>{
+        c.className="cell";
+    });
+
+
+    // старт
+    getCell(route[0].x, route[0].y)
+    .classList.add("start");
+
+
+    // путь
+    route.forEach((p,i)=>{
+
+        setTimeout(()=>{
+
+            getCell(p.x,p.y)
+            .classList.add("path");
+
+
+        }, i*showSteps[showSpeed.value-1]);
+
+setTimeout(()=>{
+
+    cells.forEach(c=>{
+        c.className="cell";
+    });
+
+
+    getCell(route[0].x,route[0].y)
+    .classList.add("start");
+
+
+    playing=true;
+    playerStep=1;
+
+    status.textContent="Повторите путь";
+
+
+}, route.length * showSteps[showSpeed.value-1]
++ memorySteps[memoryTime.value-1]);
+    });
+
+}
+
+
+
+/* проверка */
+
+function checkMove(x,y){
+
+
+    let target=route[playerStep];
+
+
+    if(!target) return;
+
+
+    if(
+        target.x===x &&
+        target.y===y
+    ){
+
+        getCell(x,y)
+.classList.add("path");
+
+
+        playerStep++;
+
+
+if(playerStep===route.length){
+
+    getCell(route.finish.x, route.finish.y)
+    .classList.add("finish");
+
+    correct++;
+
+    setTimeout(()=>{
+        nextRound();
+    },700);
+
+}
+
+
+    }
+
+else{
+
+    mistakes++;
+
+    showMistakeRoute();
+
+}
+
+}
+
+function showMistakeRoute(){
+
+    playing=false;
+
+
+    // показываем весь правильный путь
+
+    route.forEach((p,i)=>{
+
+    if(i!==0){
+
+        getCell(p.x,p.y)
+        .classList.add("path");
+
+    }
+
+});
+
+
+    status.textContent="Ошибка. Правильный путь";
+
+
+    setTimeout(()=>{
+
+        cells.forEach(c=>{
+            c.className="cell";
+        });
+
+
+        nextRound();
+
+
+    },1000);
+
+}
+
+function nextRound(){
+
+    playing=false;
+
+    currentTask++;
+
+
+    if(currentTask>=totalTasks){
+
+    status.textContent =
+    "Результат: " +
+    correct +
+    " верно, " +
+    mistakes +
+    " ошибок";
+
+
+    newGame.style.display="inline-block";
+
+start.disabled=true;
+
+
+    return;
+}
+
+
+    status.textContent =
+    "Задание " +
+    (currentTask+1) +
+    " из " +
+    totalTasks;
+
+
+    setTimeout(()=>{
+
+        createRoute(
+            Number(lengthRange.value)
+        );
+
+        showRoute();
+
+    },500);
+
+}
+
+
+start.onclick=()=>{
+
+    currentTask=0;
+    correct=0;
+    mistakes=0;
+
+newGame.style.display="none";
+
+
+    status.textContent="Задание 1 из 10";
+
+
+    createRoute(
+        Number(lengthRange.value)
+    );
+
+    showRoute();
+
+};
+
+
+stop.onclick=()=>{
+
+    playing=false;
+
+    cells.forEach(c=>
+        c.className="cell"
+    );
+
+    status.textContent="Остановлено";
+
+};
+
+restart.onclick=()=>{
+
+    playing=false;
+
+    cells.forEach(c=>{
+        c.className="cell";
+    });
+
+    status.textContent="Новый маршрут";
+
+
+    createRoute(
+        Number(lengthRange.value)
+    );
+
+    showRoute();
+
+};
+
+newGame.onclick=()=>{
+
+    currentTask=0;
+    correct=0;
+    mistakes=0;
+
+    newGame.style.display="none";
+
+start.disabled=false;
+
+    status.textContent="Задание 1 из 10";
+
+
+    createRoute(
+        Number(lengthRange.value)
+    );
+
+    showRoute();
+
+};
+
+/* стрелки */
+
+document.querySelectorAll(".arrow")
+.forEach(btn=>{
+
+
+btn.onclick=()=>{
+
+
+if(!playing)return;
+
+
+let pos=route[playerStep-1];
+
+
+let x=pos.x;
+let y=pos.y;
+
+
+let d=btn.dataset.dir;
+
+
+if(d==="up")y--;
+if(d==="down")y++;
+if(d==="left")x--;
+if(d==="right")x++;
+
+
+checkMove(x,y);
+
+
+};
+
+
+});
+
+
+
+</script>
+
+
+<script src="./nav.js"></script>
+
+</body>
+</html>
