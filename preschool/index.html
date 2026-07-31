@@ -400,6 +400,50 @@ h1{
 🧸 Дошколятам
 </div>
 
+
+<div class="card" onclick="openTrainer('alf/letalf.html')">
+
+<div class="left">
+
+<div class="icon">
+🔤
+</div>
+
+<div class="title">
+Буквы
+</div>
+
+</div>
+
+<div class="arrow">
+›
+</div>
+
+</div>
+
+
+
+<div class="card" onclick="openTrainer('pathfinder.html')">
+
+<div class="left">
+
+<div class="icon">
+🧭
+</div>
+
+<div class="title">
+Следопыт
+</div>
+
+</div>
+
+<div class="arrow">
+›
+</div>
+
+</div>
+
+
 </div>
 
 
@@ -425,11 +469,9 @@ function goBack(){
 
 
 
-function openTrainer(name){
+function openTrainer(path){
 
-    console.log("Открыть:",name);
-
-    // сюда потом подключим реальные тренажёры
+    location.href = path;
 
 }
 
