@@ -1,0 +1,2115 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Деление — тренажёр</title>
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --blue: #1E3F8A;
+      --orange: #FF6A00;
+      --bg: #f3f5fb;
+      --card: #ffffff;
+      --text: #202533;
+      --muted: #6d7484;
+      --ok: #35a66f;
+      --bad: #dc5a5a;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    button {
+      font: inherit;
+      cursor: pointer;
+    }
+
+    .app {
+      max-width: 1050px;
+      margin: auto;
+      padding: 20px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0;
+      color: var(--blue);
+      font-size: 28px;
+    }
+
+    .subtitle {
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
+    .stats {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .pill {
+      background: white;
+      border-radius: 14px;
+      padding: 9px 13px;
+      box-shadow: 0 3px 12px #0000000d;
+      font-weight: bold;
+    }
+
+    .menu {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 15px;
+    }
+
+    .menu button {
+      border: 0;
+      background: white;
+      color: var(--blue);
+      padding: 9px 13px;
+      border-radius: 12px;
+      font-weight: bold;
+      transition: .15s;
+    }
+
+    .menu button:hover {
+      transform: translateY(-1px);
+    }
+
+    .menu button.active {
+      background: var(--blue);
+      color: white;
+    }
+
+    .menu button.random {
+      background: var(--orange);
+      color: white;
+    }
+
+    .screen {
+      background: var(--card);
+      border-radius: 24px;
+      padding: 24px;
+      box-shadow: 0 8px 30px #243b6414;
+      min-height: 610px;
+    }
+
+    .topline {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      gap: 10px;
+    }
+
+    .mode {
+      font-size: 18px;
+      font-weight: bold;
+      color: var(--blue);
+      white-space: nowrap;
+    }
+
+    .progress {
+      height: 8px;
+      background: #e7eaf1;
+      border-radius: 8px;
+      overflow: hidden;
+      flex: 1;
+      margin: 0 18px;
+    }
+
+    .progress i {
+      display: block;
+      height: 100%;
+      background: var(--orange);
+      width: 0;
+      transition: .25s;
+    }
+
+    .task {
+      font-size: 20px;
+      text-align: center;
+      margin: 10px 0 18px;
+      line-height: 1.4;
+    }
+
+    .objects {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 20px auto;
+      min-height: 120px;
+      align-items: center;
+      max-width: 800px;
+    }
+
+    .groups {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin: 25px auto;
+    }
+
+    .group {
+      width: 190px;
+      min-height: 145px;
+      border: 3px dashed #cfd5e2;
+      border-radius: 18px;
+      padding: 12px;
+      background: #fafbfe;
+      text-align: center;
+      transition: .15s;
+    }
+
+    .group-title {
+      font-weight: bold;
+      color: var(--blue);
+      margin-bottom: 7px;
+    }
+
+    .group-items {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      flex-wrap: wrap;
+      font-size: 30px;
+      min-height: 55px;
+    }
+
+    .drag-item {
+      font-size: 34px;
+      cursor: pointer;
+      padding: 4px;
+      user-select: none;
+      transition: .15s;
+    }
+
+    .drag-item:hover {
+      transform: scale(1.1);
+    }
+
+    .drag-item.used {
+      opacity: .2;
+      pointer-events: none;
+    }
+
+    .options {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 20px 0;
+    }
+
+    .opt,
+    .primary,
+    .secondary {
+      border: 0;
+      border-radius: 14px;
+      padding: 12px 22px;
+      font-weight: bold;
+      transition: .15s;
+    }
+
+    .opt {
+      background: #edf1f8;
+      color: var(--blue);
+      min-width: 70px;
+    }
+
+    .opt:hover,
+    .secondary:hover {
+      transform: translateY(-1px);
+      background: #e1e7f2;
+    }
+
+.opt.used {
+  background: var(--orange);
+  color: white;
+  opacity: 1;
+}
+
+    .opt.selected {
+      background: var(--blue);
+      color: white;
+    }
+
+    .primary {
+      background: var(--orange);
+      color: white;
+    }
+
+    .primary:hover {
+      filter: brightness(.95);
+      transform: translateY(-1px);
+    }
+
+    .secondary {
+      background: #eef1f7;
+      color: var(--blue);
+    }
+
+    .feedback {
+      text-align: center;
+      min-height: 52px;
+      font-weight: bold;
+      font-size: 18px;
+      padding: 8px;
+    }
+
+    .feedback.ok {
+      color: var(--ok);
+    }
+
+    .feedback.bad {
+      color: var(--bad);
+    }
+
+    .equation {
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
+      color: var(--blue);
+      margin: 20px;
+    }
+
+    .cards {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 20px;
+    }
+
+    .cardnum {
+      padding: 15px 22px;
+      border-radius: 15px;
+      background: #edf1f8;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+      user-select: none;
+      transition: .15s;
+    }
+
+    .cardnum:hover {
+      background: #e1e7f2;
+      transform: translateY(-1px);
+    }
+
+    .cardnum.used {
+      opacity: .35;
+      pointer-events: none;
+    }
+
+    .story {
+      max-width: 680px;
+      margin: 20px auto;
+      padding: 18px;
+      border-radius: 18px;
+      background: #f8f9fc;
+      text-align: center;
+      font-size: 20px;
+      line-height: 1.5;
+    }
+
+    .hint {
+      max-width: 650px;
+      margin: 12px auto;
+      padding: 14px 18px;
+      border-radius: 15px;
+      background: #fff5e9;
+      border-left: 5px solid var(--orange);
+      line-height: 1.45;
+    }
+
+    .footer {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .report {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px;
+      margin: 20px 0;
+    }
+
+    .report-card {
+      padding: 16px;
+      border-radius: 17px;
+      background: #f7f8fb;
+    }
+
+    .report-card b {
+      display: block;
+      font-size: 28px;
+      color: var(--blue);
+      margin-bottom: 5px;
+    }
+
+    .random-mode {
+      color: var(--orange);
+    }
+
+    @media (max-width: 650px) {
+
+      .app {
+        padding: 10px;
+      }
+
+      .screen {
+        padding: 15px;
+        border-radius: 18px;
+      }
+
+      header {
+        align-items: flex-start;
+      }
+
+      .stats {
+        font-size: 13px;
+      }
+
+      .progress {
+        margin: 0 8px;
+      }
+
+      .group {
+        width: 145px;
+      }
+
+      .equation {
+        font-size: 38px;
+      }
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <div class="app">
+
+    <header>
+
+      <div>
+        <h1>Деление</h1>
+
+        <div class="subtitle">
+          Пойми → разложи → запиши → автоматизируй
+        </div>
+      </div>
+
+      <div class="stats">
+
+        <div class="pill">
+          ⭐ <span id="score">0</span>
+        </div>
+
+        <div class="pill">
+          🔥 <span id="streak">0</span>
+        </div>
+
+      </div>
+
+    </header>
+
+
+    <div class="menu" id="menu"></div>
+
+
+    <section class="screen">
+
+      <div class="topline">
+
+        <div class="mode" id="modeName">
+          Раздай
+        </div>
+
+        <div class="progress">
+          <i id="bar"></i>
+        </div>
+
+        <div id="counter">
+          1/10
+        </div>
+
+      </div>
+
+
+      <div id="content"></div>
+
+
+      <div class="feedback" id="feedback"></div>
+
+
+      <div class="footer">
+
+        <button
+          class="secondary"
+          id="hintBtn"
+        >
+          💡 Подсказка
+        </button>
+
+        <button
+          class="primary hidden"
+          id="nextBtn"
+        >
+          Дальше →
+        </button>
+
+      </div>
+
+
+      <div
+        id="hintBox"
+        class="hint hidden"
+      ></div>
+
+    </section>
+
+  </div>
+
+
+<script>
+
+const $ = selector =>
+  document.querySelector(selector);
+
+
+/*
+  Все доступные режимы.
+
+  randomMode = true означает,
+  что на каждом новом вопросе
+  режим выбирается заново.
+*/
+
+const modes = [
+
+  ["deal", "Раздай"],
+
+  ["howmany", "Сколько каждому?"],
+
+  ["howgroups", "Сколько групп?"],
+
+  ["build", "Собери пример"],
+
+  ["mistake", "Найди ошибку"],
+
+  ["family", "Семейство чисел"],
+
+  ["speed", "Быстрый раунд"]
+
+];
+
+
+const state = {
+
+  mode: "deal",
+
+  randomMode: false,
+
+  q: 0,
+
+  total: 10,
+
+  score: 0,
+
+  streak: 0,
+
+  correct: 0,
+
+  wrong: 0,
+
+  a: 12,
+
+  b: 3,
+
+  ans: 4,
+
+  attempts: 0,
+
+  solved: false
+
+};
+
+
+let build = [];
+
+let familySelected = [];
+
+
+/* ---------------------------
+   ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ
+---------------------------- */
+
+
+function shuffle(array) {
+
+  return [...array].sort(
+    () => Math.random() - 0.5
+  );
+
+}
+
+
+function randomMode() {
+
+  return modes[
+    Math.floor(
+      Math.random() * modes.length
+    )
+  ][0];
+
+}
+
+
+function modeName(mode) {
+
+  const found =
+    modes.find(
+      item => item[0] === mode
+    );
+
+  return found
+    ? found[1]
+    : "";
+
+}
+
+
+function getOptions(correct) {
+
+  const values = new Set();
+
+  values.add(correct);
+
+
+  while (values.size < 4) {
+
+    const offset =
+      Math.floor(
+        Math.random() * 5
+      ) - 2;
+
+    const value =
+      correct + offset;
+
+
+    if (value > 0) {
+
+      values.add(value);
+
+    }
+
+  }
+
+
+  return shuffle(
+    [...values]
+  );
+
+}
+
+
+/*
+  Все задачи здесь решаются без остатка.
+  Пока ребёнку не нужен остаток.
+*/
+
+function randProblem() {
+
+  const pairs = [
+
+    [6, 2],
+    [6, 3],
+
+    [8, 2],
+    [8, 4],
+
+    [10, 2],
+    [10, 5],
+
+    [12, 2],
+    [12, 3],
+    [12, 4],
+
+    [15, 3],
+
+    [16, 2],
+    [16, 4],
+
+    [18, 3],
+    [18, 6],
+
+    [20, 4],
+    [20, 5],
+
+    [21, 3],
+
+    [24, 4],
+    [24, 6],
+
+    [25, 5],
+
+    [30, 5]
+
+  ];
+
+
+  const pair =
+    pairs[
+      Math.floor(
+        Math.random() * pairs.length
+      )
+    ];
+
+
+  state.a = pair[0];
+
+  state.b = pair[1];
+
+  state.ans =
+    state.a / state.b;
+
+  state.attempts = 0;
+
+  state.solved = false;
+
+}
+
+
+/*
+  Если включена свободная тренировка,
+  режим меняется на каждом новом вопросе.
+*/
+
+function chooseModeForQuestion() {
+
+  if (state.randomMode) {
+
+    state.mode =
+      randomMode();
+
+  }
+
+}
+
+
+/* ---------------------------
+   МЕНЮ
+---------------------------- */
+
+
+function renderMenu() {
+
+  const menu =
+    $("#menu");
+
+
+  let html = "";
+
+
+  html += `
+
+    <button
+      class="random ${state.randomMode ? "active" : ""}"
+      data-random="true"
+    >
+      🎲 Тренировка
+    </button>
+
+  `;
+
+
+  html += modes
+    .map(
+      ([id, name]) => `
+
+        <button
+          data-mode="${id}"
+          class="${!state.randomMode && id === state.mode ? "active" : ""}"
+        >
+          ${name}
+        </button>
+
+      `
+    )
+    .join("");
+
+
+  menu.innerHTML = html;
+
+
+  menu
+    .querySelector("[data-random]")
+    .onclick = () => {
+
+      state.randomMode = true;
+
+      state.q = 0;
+
+      state.score = 0;
+
+      state.streak = 0;
+
+      state.correct = 0;
+
+      state.wrong = 0;
+
+      chooseModeForQuestion();
+
+      randProblem();
+
+      render();
+
+    };
+
+
+  menu
+    .querySelectorAll("[data-mode]")
+    .forEach(button => {
+
+      button.onclick = () => {
+
+        state.randomMode = false;
+
+        state.mode =
+          button.dataset.mode;
+
+        state.q = 0;
+
+        state.score = 0;
+
+        state.streak = 0;
+
+        state.correct = 0;
+
+        state.wrong = 0;
+
+        randProblem();
+
+        render();
+
+      };
+
+    });
+
+}
+
+
+/* ---------------------------
+   ОСНОВНОЙ RENDER
+---------------------------- */
+
+
+function render() {
+
+  renderMenu();
+
+
+  $("#score").textContent =
+    state.score;
+
+
+  $("#streak").textContent =
+    state.streak;
+
+
+  $("#modeName").textContent =
+    state.randomMode
+      ? `🎲 ${modeName(state.mode)}`
+      : modeName(state.mode);
+
+
+  if (state.randomMode) {
+
+    $("#modeName")
+      .classList
+      .add("random-mode");
+
+  } else {
+
+    $("#modeName")
+      .classList
+      .remove("random-mode");
+
+  }
+
+
+  $("#counter").textContent =
+    state.q >= state.total
+      ? ""
+      : `${state.q + 1}/${state.total}`;
+
+
+  $("#bar").style.width =
+    `${Math.min(
+      state.q / state.total * 100,
+      100
+    )}%`;
+
+
+  $("#feedback").className =
+    "feedback";
+
+
+  $("#feedback").textContent = "";
+
+
+  $("#hintBox")
+    .classList
+    .add("hidden");
+
+
+  $("#nextBtn")
+    .classList
+    .add("hidden");
+
+
+  $("#nextBtn").textContent =
+    "Дальше →";
+
+
+  if (state.q >= state.total) {
+
+    renderReport();
+
+    return;
+
+  }
+
+
+  const content =
+    $("#content");
+
+
+  if (state.mode === "deal") {
+
+    renderDeal(content);
+
+  }
+
+
+  if (state.mode === "howmany") {
+
+    renderHowMany(content);
+
+  }
+
+
+  if (state.mode === "howgroups") {
+
+    renderHowGroups(content);
+
+  }
+
+
+  if (state.mode === "build") {
+
+    renderBuild(content);
+
+  }
+
+
+  if (state.mode === "mistake") {
+
+    renderMistake(content);
+
+  }
+
+
+  if (state.mode === "family") {
+
+    renderFamily(content);
+
+  }
+
+
+  if (state.mode === "speed") {
+
+    renderSpeed(content);
+
+  }
+
+}
+
+
+/* ---------------------------
+   КАРТИНКИ / ГРУППЫ
+---------------------------- */
+
+
+function emojis(number) {
+
+  return "🍎".repeat(number);
+
+}
+
+
+function groupsHTML(numberOfGroups) {
+
+  return `
+
+    <div class="groups">
+
+      ${Array.from(
+        {
+          length: numberOfGroups
+        },
+        (_, index) => `
+
+          <div class="group">
+
+            <div class="group-title">
+              Корзина ${index + 1}
+            </div>
+
+            <div class="group-items"></div>
+
+          </div>
+
+        `
+      ).join("")}
+
+    </div>
+
+  `;
+
+}
+
+
+function groupsFilled(total, groups) {
+
+  const perGroup =
+    total / groups;
+
+
+  return `
+
+    <div class="groups">
+
+      ${Array.from(
+        {
+          length: groups
+        },
+        (_, index) => `
+
+          <div class="group">
+
+            <div class="group-title">
+              Корзина ${index + 1}
+            </div>
+
+            <div class="group-items">
+              ${emojis(perGroup)}
+            </div>
+
+          </div>
+
+        `
+      ).join("")}
+
+    </div>
+
+
+    <div class="story">
+
+      <b>${total}</b>
+      яблок разделили поровну между
+      <b>${groups}</b>
+      корзинами.
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------------------------
+   1. РАЗДАЙ
+---------------------------- */
+
+
+function renderDeal(content) {
+
+  content.innerHTML = `
+
+    <div class="task">
+
+      Раздай
+      <b>${state.a}</b>
+      яблок поровну между
+      <b>${state.b}</b>
+      корзинами.
+
+    </div>
+
+
+    <div class="objects">
+
+      ${Array.from(
+        {
+          length: state.a
+        },
+        () => `
+          <span class="drag-item">
+            🍎
+          </span>
+        `
+      ).join("")}
+
+    </div>
+
+
+    ${groupsHTML(state.b)}
+
+
+    <div class="story">
+
+      Нажимай на яблоки по одному.
+      Они будут раскладываться по корзинам
+      по очереди.
+
+    </div>
+
+  `;
+
+
+  let index = 0;
+
+
+  document
+    .querySelectorAll(".drag-item")
+    .forEach(item => {
+
+      item.onclick = () => {
+
+        if (
+          item.classList.contains("used") ||
+          state.solved
+        ) {
+
+          return;
+
+        }
+
+
+        const groups =
+          document.querySelectorAll(
+            ".group"
+          );
+
+
+        const target =
+          groups[
+            index % state.b
+          ];
+
+
+        target
+          .querySelector(".group-items")
+          .insertAdjacentHTML(
+            "beforeend",
+            "<span>🍎</span>"
+          );
+
+
+        item.classList.add("used");
+
+        index++;
+
+
+        if (
+          index === state.a
+        ) {
+
+          checkDeal();
+
+        }
+
+      };
+
+    });
+
+}
+
+
+function checkDeal() {
+
+  const counts =
+    [...document.querySelectorAll(".group")]
+      .map(
+        group =>
+          group.querySelectorAll(
+            ".group-items span"
+          ).length
+      );
+
+
+  const correct =
+    counts.every(
+      value =>
+        value === counts[0]
+    );
+
+
+  if (correct) {
+
+    success(
+      `Отлично! В каждой корзине по ${counts[0]}.`
+    );
+
+
+    showEquation(
+      state.a,
+      state.b,
+      counts[0]
+    );
+
+  } else {
+
+    fail(
+      "Проверь: во всех корзинах должно быть одинаковое количество."
+    );
+
+  }
+
+}
+
+
+/* ---------------------------
+   2. СКОЛЬКО КАЖДОМУ
+---------------------------- */
+
+
+function renderHowMany(content) {
+
+  content.innerHTML = `
+
+    <div class="task">
+
+      Сколько получит каждый?
+
+    </div>
+
+
+    ${groupsFilled(
+      state.a,
+      state.b
+    )}
+
+
+    <div class="options">
+
+      ${getOptions(
+        state.ans
+      )
+        .map(
+          value => `
+
+            <button
+              class="opt"
+              onclick="answer(
+                ${value},
+                ${state.ans}
+              )"
+            >
+              ${value}
+            </button>
+
+          `
+        )
+        .join("")}
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------------------------
+   3. СКОЛЬКО ГРУПП
+---------------------------- */
+
+
+function renderHowGroups(content) {
+
+  content.innerHTML = `
+
+    <div class="task">
+
+      Есть
+      <b>${state.a}</b>
+      конфет.
+
+      В каждую коробку кладём по
+      <b>${state.b}</b>.
+
+      Сколько коробок получится?
+
+    </div>
+
+
+    <div class="objects">
+
+      ${emojis(state.a)}
+
+    </div>
+
+
+    <div class="options">
+
+      ${getOptions(
+        state.ans
+      )
+        .map(
+          value => `
+
+            <button
+              class="opt"
+              onclick="answer(
+                ${value},
+                ${state.ans}
+              )"
+            >
+              ${value}
+            </button>
+
+          `
+        )
+        .join("")}
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------------------------
+   4. СОБЕРИ ПРИМЕР
+---------------------------- */
+
+
+function renderBuild(content) {
+
+  build = [];
+
+
+  const cards =
+    shuffle([
+      state.a,
+      state.b,
+      state.ans,
+      ":",
+      "="
+    ]);
+
+
+  content.innerHTML = `
+
+    <div class="task">
+
+      Собери пример по ситуации.
+
+    </div>
+
+
+    ${groupsFilled(
+      state.a,
+      state.b
+    )}
+
+
+    <div
+      class="equation"
+      id="eq"
+    >
+      _ _ _ _ _
+    </div>
+
+
+    <div class="cards">
+
+      ${cards
+        .map(
+          value => `
+
+            <div
+              class="cardnum"
+              data-value="${value}"
+              onclick="pickCard(this)"
+            >
+              ${value}
+            </div>
+
+          `
+        )
+        .join("")}
+
+    </div>
+
+  `;
+
+}
+
+
+function pickCard(element) {
+
+  if (
+    element.classList.contains("used") ||
+    state.solved
+  ) {
+
+    return;
+
+  }
+
+
+  build.push(
+    element.dataset.value
+  );
+
+
+  element.classList.add("used");
+
+
+  $("#eq").textContent =
+    build.join(" ");
+
+
+  if (
+    build.length !== 5
+  ) {
+
+    return;
+
+  }
+
+
+  const result =
+    build.join("");
+
+
+  const correct =
+    `${state.a}:${state.b}=${state.ans}`;
+
+
+  if (result === correct) {
+
+    success(
+      "Да! Ты перевела ситуацию в математическую запись."
+    );
+
+
+    showEquation(
+      state.a,
+      state.b,
+      state.ans
+    );
+
+  } else {
+
+    fail(
+      `Нужна запись: ${state.a} : ${state.b} = ${state.ans}`
+    );
+
+
+    setTimeout(
+      () => {
+
+        build = [];
+
+        render();
+
+      },
+      900
+    );
+
+  }
+
+}
+
+
+/* ---------------------------
+   5. НАЙДИ ОШИБКУ
+---------------------------- */
+
+
+function renderMistake(content) {
+
+  /*
+    Иногда пример правильный,
+    иногда неправильный.
+    Поэтому ребёнок не может
+    просто всегда нажимать «Ошибка».
+  */
+
+  const isWrong =
+    Math.random() < 0.65;
+
+
+  let displayedAnswer;
+
+
+  if (isWrong) {
+
+    const wrongOptions =
+      getOptions(state.ans)
+        .filter(
+          value =>
+            value !== state.ans
+        );
+
+
+    displayedAnswer =
+      wrongOptions[0];
+
+  } else {
+
+    displayedAnswer =
+      state.ans;
+
+  }
+
+
+  content.innerHTML = `
+
+    <div class="task">
+
+      Учитель записал:
+
+    </div>
+
+
+    <div class="equation">
+
+      ${state.a} :
+      ${state.b} =
+      ${displayedAnswer}
+
+    </div>
+
+
+    ${groupsFilled(
+      state.a,
+      state.b
+    )}
+
+
+    <div class="options">
+
+      <button
+        class="opt"
+        onclick="mistakeAnswer(
+          ${!isWrong}
+        )"
+      >
+        Верно
+      </button>
+
+
+      <button
+        class="opt"
+        onclick="mistakeAnswer(
+          ${isWrong}
+        )"
+      >
+        Ошибка
+      </button>
+
+    </div>
+
+  `;
+
+}
+
+
+function mistakeAnswer(correct) {
+
+  if (state.solved) {
+
+    return;
+
+  }
+
+
+  if (correct) {
+
+    success(
+      "Верно! Ты проверила пример по количеству."
+    );
+
+
+    showEquation(
+      state.a,
+      state.b,
+      state.ans
+    );
+
+  } else {
+
+    fail(
+      "Проверь пример ещё раз по картинке."
+    );
+
+  }
+
+}
+
+
+/* ---------------------------
+   6. СЕМЕЙСТВО ЧИСЕЛ
+---------------------------- */
+
+
+function renderFamily(content) {
+
+  familySelected = [];
+
+
+  const correctFamily = [
+
+    `${state.b} × ${state.ans} = ${state.a}`,
+
+    `${state.ans} × ${state.b} = ${state.a}`,
+
+    `${state.a} : ${state.b} = ${state.ans}`,
+
+    `${state.a} : ${state.ans} = ${state.b}`
+
+  ];
+
+
+  /*
+    Добавляем четыре ложных варианта.
+  */
+
+  const wrong1 =
+    `${state.b} × ${state.ans} = ${state.a + 1}`;
+
+  const wrong2 =
+    `${state.a} : ${state.b} = ${state.b}`;
+
+  const wrong3 =
+    `${state.a} : ${state.ans} = ${state.ans}`;
+
+  const wrong4 =
+    `${state.b} × ${state.b} = ${state.a}`;
+
+
+  const all =
+    shuffle([
+      ...correctFamily.map(
+        text => ({
+          text,
+          correct: true
+        })
+      ),
+
+      {
+        text: wrong1,
+        correct: false
+      },
+
+      {
+        text: wrong2,
+        correct: false
+      },
+
+      {
+        text: wrong3,
+        correct: false
+      },
+
+      {
+        text: wrong4,
+        correct: false
+      }
+
+    ]);
+
+
+  content.innerHTML = `
+
+    <div class="task">
+
+      Выбери четыре связанных примера.
+
+    </div>
+
+
+    <div class="story">
+
+      Все четыре правильных примера
+      используют одни и те же три числа:
+
+      <b>${state.b}</b>,
+      <b>${state.ans}</b>,
+      <b>${state.a}</b>.
+
+    </div>
+
+
+    <div class="options">
+
+      ${all
+        .map(
+          (item, index) => `
+
+            <button
+              class="opt family-option"
+              data-index="${index}"
+              data-correct="${item.correct}"
+              onclick="familyPick(this)"
+            >
+              ${item.text}
+            </button>
+
+          `
+        )
+        .join("")}
+
+    </div>
+
+  `;
+
+}
+
+
+function familyPick(element) {
+
+  if (
+    element.classList.contains("used") ||
+    state.solved
+  ) {
+
+    return;
+
+  }
+
+
+  const isCorrect =
+    element.dataset.correct === "true";
+
+
+  if (!isCorrect) {
+
+    fail(
+      "Этот пример не относится к семейству. Проверь числа."
+    );
+
+    return;
+
+  }
+
+
+  element.classList.add("used");
+
+  familySelected.push(
+    element
+  );
+
+
+  if (
+    familySelected.length === 4
+  ) {
+
+    success(
+      "Отлично! Ты нашла всё семейство."
+    );
+
+
+    showEquation(
+      state.a,
+      state.b,
+      state.ans
+    );
+
+  }
+
+}
+
+
+/* ---------------------------
+   7. БЫСТРЫЙ РАУНД
+---------------------------- */
+
+
+function renderSpeed(content) {
+
+  content.innerHTML = `
+
+    <div class="task">
+
+      Быстрый раунд: реши пример.
+
+    </div>
+
+
+    <div class="equation">
+
+      ${state.a} :
+      ${state.b} = ?
+
+    </div>
+
+
+    <div class="options">
+
+      ${getOptions(
+        state.ans
+      )
+        .map(
+          value => `
+
+            <button
+              class="opt"
+              onclick="answer(
+                ${value},
+                ${state.ans}
+              )"
+            >
+              ${value}
+            </button>
+
+          `
+        )
+        .join("")}
+
+    </div>
+
+  `;
+
+}
+
+
+/* ---------------------------
+   ОБЩИЙ ОТВЕТ
+---------------------------- */
+
+
+function answer(
+  value,
+  correct
+) {
+
+  if (state.solved) {
+
+    return;
+
+  }
+
+
+  if (
+    value === correct
+  ) {
+
+    success(
+      "Правильно!"
+    );
+
+
+    showEquation(
+      state.a,
+      state.b,
+      state.ans
+    );
+
+  } else {
+
+    fail(
+      "Пока нет. Посмотри на группы ещё раз."
+    );
+
+  }
+
+}
+
+
+/* ---------------------------
+   ПОКАЗ ПРИМЕРА
+---------------------------- */
+
+
+function showEquation(
+  a,
+  b,
+  answer
+) {
+
+  if (
+    !document.querySelector(
+      "#content .final-equation"
+    )
+  ) {
+
+    $("#content")
+      .insertAdjacentHTML(
+        "beforeend",
+
+        `
+          <div class="equation final-equation">
+
+            ${a} : ${b} = ${answer}
+
+          </div>
+        `
+      );
+
+  }
+
+
+  $("#nextBtn")
+    .classList
+    .remove("hidden");
+
+
+  state.solved = true;
+
+}
+
+
+/* ---------------------------
+   ПРАВИЛЬНО
+---------------------------- */
+
+
+function success(message) {
+
+  state.correct++;
+
+  state.score += 10;
+
+  state.streak++;
+
+  state.solved = true;
+
+
+  $("#feedback").className =
+    "feedback ok";
+
+
+  $("#feedback").textContent =
+    "✓ " + message;
+
+
+  $("#nextBtn")
+    .classList
+    .remove("hidden");
+
+
+  $("#score").textContent =
+    state.score;
+
+
+  $("#streak").textContent =
+    state.streak;
+
+}
+
+
+/* ---------------------------
+   ОШИБКА
+---------------------------- */
+
+
+function fail(message) {
+
+  state.wrong++;
+
+  state.streak = 0;
+
+  state.attempts++;
+
+
+  $("#feedback").className =
+    "feedback bad";
+
+
+  $("#feedback").textContent =
+    "↺ " + message;
+
+
+  $("#hintBox")
+    .classList
+    .remove("hidden");
+
+
+  if (
+    state.attempts >= 2
+  ) {
+
+    $("#hintBox").textContent =
+      `Подсказка: ${state.a} предметов нужно разделить на ${state.b} равных групп. Посмотри, сколько предметов получится в каждой группе.`;
+
+  } else {
+
+    $("#hintBox").textContent =
+      "Не спеши. Посмотри на группы и посчитай предметы в одной группе.";
+
+  }
+
+
+  $("#streak").textContent =
+    0;
+
+}
+
+
+/* ---------------------------
+   СЛЕДУЮЩИЙ ВОПРОС
+---------------------------- */
+
+
+$("#nextBtn").onclick = () => {
+
+  if (
+    state.q >= state.total
+  ) {
+
+    state.q = 0;
+
+    state.score = 0;
+
+    state.correct = 0;
+
+    state.wrong = 0;
+
+    state.streak = 0;
+
+    build = [];
+
+    familySelected = [];
+
+
+    if (
+      state.randomMode
+    ) {
+
+      chooseModeForQuestion();
+
+    }
+
+
+    randProblem();
+
+    render();
+
+    return;
+
+  }
+
+
+  state.q++;
+
+  build = [];
+
+  familySelected = [];
+
+
+  /*
+    Вот здесь и происходит
+    главное изменение.
+
+    Если выбрана «Тренировка»,
+    следующий вопрос может быть
+    ЛЮБОГО типа.
+  */
+
+  chooseModeForQuestion();
+
+
+  randProblem();
+
+  render();
+
+};
+
+
+/* ---------------------------
+   ПОДСКАЗКА
+---------------------------- */
+
+
+$("#hintBtn").onclick = () => {
+
+  const hint =
+    $("#hintBox");
+
+
+  hint.classList.toggle(
+    "hidden"
+  );
+
+
+  if (
+    !hint.classList.contains(
+      "hidden"
+    )
+  ) {
+
+    hint.textContent =
+      `Подумай о задаче как о равных группах: ${state.a} предметов нужно разделить на ${state.b} одинаковых групп.`;
+
+  }
+
+};
+
+
+/* ---------------------------
+   ЗАПУСК
+---------------------------- */
+
+
+init = function() {
+
+  renderMenu();
+
+  randProblem();
+
+  render();
+
+};
+
+
+init();
+
+</script>
+
+</body>
+</html>
